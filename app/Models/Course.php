@@ -14,6 +14,7 @@ class Course extends Model
         'title',
         'description',
         'slug',
+        'image',
     ];
 
     public function lessons()
