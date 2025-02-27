@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -14,13 +13,14 @@ class CourseSeeder extends Seeder
      */
     public function run()
     {
-
-        // Create specific courses manually with images
+        // Create specific courses manually with images, prices, and durations
         Course::create([
             'title' => 'Laravel for Beginners',
             'description' => 'A beginner course on Laravel, the popular PHP framework.',
             'slug' => 'laravel-for-beginners',
             'image' => 'images/courses/laravel-for-beginners.jpg', // Image path
+            'price' => 199, // Price in MAD or preferred currency
+            'duration' => 120, // Duration in minutes (example: 2 hours)
         ]);
 
         Course::create([
@@ -28,6 +28,8 @@ class CourseSeeder extends Seeder
             'description' => 'An advanced course on Vue.js for experienced developers.',
             'slug' => 'advanced-vuejs',
             'image' => 'images/courses/advanced-vuejs.jpg', // Image path
+            'price' => 299, // Price in MAD or preferred currency
+            'duration' => 150, // Duration in minutes (example: 2.5 hours)
         ]);
     }
 }

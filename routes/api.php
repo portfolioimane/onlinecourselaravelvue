@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\Backend\GeneralCustomizeController;
 // routes/api.php
 
 use App\Http\Controllers\Api\Backend\ContactController as BackendContactController;
+use App\Http\Controllers\Api\Backend\CoursesController as BackendCoursesController;
 
 
 
@@ -36,6 +37,7 @@ Route::get('courses/{course}', [CourseController::class, 'show']); // Fetch cour
 
 // Lessons Routes
 Route::get('courses/{course}/lessons/{lesson}', [CourseController::class, 'showLesson']); // Fetch lesson by ID for specific course
+Route::get('/courses/{courseId}/lessons', [CourseController::class, 'fetchLessons']);  // Endpoint to fetch lessons
 
 
 Route::post('/contact', [ContactController::class, 'store']);
@@ -82,7 +84,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
 
-    
+        Route::apiResource('courses', BackendCoursesController::class);
+        
+    Route::put('/courses/{courseId}/toggle-featured', [BackendCoursesController::class, 'toggleFeatured']);
 
     Route::get('/contact-messages', [BackendContactController::class, 'index']);
    

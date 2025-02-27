@@ -13,7 +13,30 @@
           </router-link>
         </li>
 
+        <!-- Manage Courses Section -->
+        <li>
+          <div @click="toggleCoursesDropdown" class="dropdown-header">
+            <i class="material-icons sidebar-icon">shopping_bag</i>
+            Manage Courses
+            <i class="material-icons dropdown-arrow">{{ isCoursesDropdownOpen ? 'arrow_drop_up' : 'arrow_drop_down' }}</i>
+          </div>
+          <ul v-if="isCoursesDropdownOpen" class="dropdown-list">
+            <li>
+              <router-link 
+                to="/admin/courses" 
+                class="sidebar-link" 
+                :class="{ active: isActive('/admin/courses') }">View Courses</router-link>
+            </li>
+            <li>
+              <router-link 
+                to="/admin/courses/add" 
+                class="sidebar-link" 
+                :class="{ active: isActive('/admin/courses/add') }">Add Course</router-link>
+            </li>
+    
 
+          </ul>
+        </li>
 
 
 
@@ -104,6 +127,7 @@ export default {
   name: 'AdminLayout',
   data() {
     return {
+      isCoursesDropdownOpen: false,
       isCustomizeDropdownOpen: false, 
       isSettingsDropdownOpen: false,
     };
@@ -115,6 +139,9 @@ export default {
   },
   methods: {
 
+       toggleCoursesDropdown() {
+      this.isCoursesDropdownOpen = !this.isCoursesDropdownOpen;
+    },
     toggleCustomizeDropdown() {
       this.isCustomizeDropdownOpen = !this.isCustomizeDropdownOpen;
     },

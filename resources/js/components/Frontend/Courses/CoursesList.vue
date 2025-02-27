@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Popular Courses</h1>
+    <h1>Popular Online Courses</h1>
 
     <div v-if="isLoading" class="loading">Loading...</div>
     <div v-if="error" class="error">{{ error }}</div>
@@ -9,18 +9,21 @@
       <div v-for="course in courses" :key="course.id" class="course-card">
         <router-link :to="{ name: 'course', params: { courseId: course.id } }" class="course-link">
           <div class="course-image">
-            <img :src="course.image" alt="Course Image" />
+            <img :src="course.image || 'default-image-url.jpg'" alt="Course Image" />
           </div>
           <div class="course-details">
             <h3 class="course-title">{{ course.title }}</h3>
             <p class="course-description">{{ course.description }}</p>
-            <button class="view-button">View Course</button>
+            <p class="course-price">{{ course.price ? `${course.price} MAD` : 'Free' }}</p>
+            <p class="course-duration">{{ formatDuration(course.duration) }}</p>
+            <button class="view-button">View Details</button>
           </div>
         </router-link>
       </div>
     </div>
   </div>
 </template>
+
 <script>
 import { mapGetters, mapActions } from 'vuex';
 
@@ -37,10 +40,16 @@ export default {
     this.fetchCourses();  // Dispatching the action to fetch courses
   },
   methods: {
+      formatDuration(durationInMinutes) {
+      const hours = Math.floor(durationInMinutes / 60);
+      const minutes = durationInMinutes % 60;
+      return `${hours}h ${minutes}m`;
+    },
     ...mapActions('courses', ['fetchCourses']),  // Mapping the `fetchCourses` action from Vuex
   },
 };
 </script>
+
 <style scoped>
 .error {
   color: red;
@@ -97,6 +106,19 @@ export default {
 .course-description {
   font-size: 1rem;
   color: #555;
+  margin-bottom: 15px;
+}
+
+.course-price {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1E90FF;
+  margin-bottom: 10px;
+}
+
+.course-duration {
+  font-size: 0.9rem;
+  color: #777;
   margin-bottom: 15px;
 }
 

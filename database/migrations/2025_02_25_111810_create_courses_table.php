@@ -17,6 +17,10 @@ return new class extends Migration
             $table->text('description');
             $table->string('slug')->unique();
             $table->string('image')->nullable(); // Add image column (nullable in case not every course has an image)
+            $table->decimal('price', 10, 2)->nullable();
+            $table->integer('duration')->nullable(); // Add duration column (in minutes, for example)
+            $table->boolean('featured')->default(false);  // Add 'featured' column
+
             $table->timestamps();
         });
     }

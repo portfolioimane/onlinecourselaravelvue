@@ -21,6 +21,24 @@ class CourseController extends Controller
         return response()->json($courses);
     }
 
+    public function fetchLessons($courseId)
+    {
+        // Fetch the course by ID
+        $course = Course::find($courseId);
+
+        // Check if the course exists
+        if (!$course) {
+            return response()->json(['message' => 'Course not found'], 404);
+        }
+
+        // Fetch all lessons associated with this course
+        $lessons = $course->lessons;  // Assuming a relationship exists
+
+        // Return lessons data
+        return response()->json($lessons);
+    }
+
+
     public function show($id)
     {
         // Fetch a single course with lessons based on course ID

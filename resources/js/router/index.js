@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import store from '../store/index.js';
-import Courses from '../components/Courses.vue';
-import CoursePage from '../components/CoursePage.vue';
-import LessonPage from '../components/LessonPage.vue';
+import CoursesList from '../components/Frontend/Courses/CoursesList.vue';
+import CoursePage from '../components/Frontend/Courses/CoursePage.vue';
+import LessonPage from '../components/Frontend/Courses/LessonPage.vue';
 
 // Import the layout
 import AppLayout from '../components/Frontend/Layout/AppLayout.vue';
@@ -36,6 +36,11 @@ import HomePageHeader from '../components/Admin/Customize/HomePageHeader.vue';
 import Customers from '../components/Admin/Customers/Customers.vue';
 import ContactMessages from '../components/Admin/Customers/ContactMessages.vue';
 
+import Courses from '../components/Admin/Courses/Courses.vue';
+import AddCourse from '../components/Admin/Courses/AddCourse.vue';
+import EditCourse from '../components/Admin/Courses/EditCourse.vue';
+
+
 
 
 
@@ -48,9 +53,9 @@ const routes = [
     path: '/',
     component: AppLayout,
     children: [
-       { path: 'courses',
-         name: 'courses',
-         component: Courses 
+       { path: 'coursesList',
+         name: 'coursesList',
+         component: CoursesList 
        },
        { path: '/course/:courseId',
         name: 'course',
@@ -120,6 +125,23 @@ const routes = [
         name: 'AdminDashboard',
         path: 'dashboard',
         component: AdminDashboard,
+      },
+            {
+        name: 'Courses',
+        path: 'courses',
+        component: Courses,
+      },
+
+      {
+        name: 'AddCourses',
+        path: 'courses/add',
+        component: AddCourse,
+      },
+
+          {
+        path: 'courses/edit/:id',
+        name: 'EditCourse',
+        component: EditCourse,
       },
      
                {
