@@ -12,6 +12,7 @@ class Lesson extends Model
     // Define fillable fields to protect mass assignment
     protected $fillable = [
         'title',
+        'slug',
         'content',
         'video_embed_code',
         'course_id',

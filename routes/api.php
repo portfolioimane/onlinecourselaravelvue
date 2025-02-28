@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Backend\GeneralCustomizeController;
 use App\Http\Controllers\Api\Backend\ContactController as BackendContactController;
 use App\Http\Controllers\Api\Backend\CoursesController as BackendCoursesController;
 
+use App\Http\Controllers\Api\Backend\LessonsController as BackendLessonsController;
 
 
 use App\Http\Controllers\Api\Customer\CutomizeController;
@@ -84,7 +85,28 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
 
-        Route::apiResource('courses', BackendCoursesController::class);
+
+
+    Route::apiResource('courses', BackendCoursesController::class);
+
+
+    // Route to get all lessons of a specific course
+    Route::get('/courses/{courseId}/lessons', [BackendLessonsController::class, 'index']);
+    
+    
+
+Route::get('/lessons/{lessonId}', [BackendLessonsController::class, 'getLesson']);
+
+    
+    // Route to create a new lesson for a specific course
+    Route::post('/courses/{courseId}/lessons', [BackendLessonsController::class, 'store']);
+
+    
+    // Route to update a lesson
+    Route::put('/lessons/{lessonId}', [BackendLessonsController::class, 'update']);
+    
+    // Route to delete a lesson
+    Route::delete('/lessons/{lessonId}', [BackendLessonsController::class, 'destroy']);
         
     Route::put('/courses/{courseId}/toggle-featured', [BackendCoursesController::class, 'toggleFeatured']);
 

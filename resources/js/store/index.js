@@ -10,6 +10,7 @@ import generalCustomize from './modules/generalcustomize.js';
 import contact from './modules/contact.js';
 import backendContact from './modules/backend/contact.js';
 import backendCourses from './modules/backend/courses.js';
+import backendLessons from './modules/backend/lessons.js';
 
 
 const store = createStore({ // Use createStore for Vue 3
@@ -25,6 +26,7 @@ const store = createStore({ // Use createStore for Vue 3
     contact,
     backendContact,
     backendCourses,
+    backendLessons,
 
 
   },

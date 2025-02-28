@@ -9,19 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up()
-{
-    Schema::create('lessons', function (Blueprint $table) {
-        $table->id();
-        $table->string('title');
-        $table->text('content'); // For text-based lesson content
-        $table->text('video_embed_code'); // Change to text for longer embed code
-        $table->foreignId('course_id')->constrained()->onDelete('cascade');
-        $table->timestamps();
-    });
-}
-
-
+    public function up()
+    {
+        Schema::create('lessons', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->string('slug')->unique(); // Add a slug field, ensuring it's unique
+            $table->text('content'); // For text-based lesson content
+            $table->text('video_embed_code'); // Change to text for longer embed code
+            $table->foreignId('course_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

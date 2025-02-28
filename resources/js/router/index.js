@@ -39,11 +39,10 @@ import ContactMessages from '../components/Admin/Customers/ContactMessages.vue';
 import Courses from '../components/Admin/Courses/Courses.vue';
 import AddCourse from '../components/Admin/Courses/AddCourse.vue';
 import EditCourse from '../components/Admin/Courses/EditCourse.vue';
+import ManageLessons from '../components/Admin/Lessons/ManageLessons.vue';
 
-
-
-
-
+import AddLesson from '../components/Admin/Lessons/AddLesson.vue';
+import EditLesson from '../components/Admin/Lessons/EditLesson.vue';
 
 
 
@@ -131,6 +130,17 @@ const routes = [
         path: 'courses',
         component: Courses,
       },
+       {
+  path: 'courses/:courseId/lessons',
+  name: 'ManageLessons',
+  component: ManageLessons, 
+},
+{
+  path: '/courses/:courseId/add-lesson',
+  name: 'AddLesson',
+  component:AddLesson,
+},
+
 
       {
         name: 'AddCourses',
@@ -142,6 +152,11 @@ const routes = [
         path: 'courses/edit/:id',
         name: 'EditCourse',
         component: EditCourse,
+      },
+             {
+        path: 'courses/:courseId/lessons/edit/:lessonId',
+        name: 'EditLesson',
+        component: EditLesson,
       },
      
                {

@@ -7,7 +7,6 @@ const state = {
     lessons: [], // Add lessons array here
     loading: false,
     error: null,
-    watchedLessons: [],  // New state for watched lessons
 };
 
 const getters = {
@@ -17,7 +16,6 @@ const getters = {
     lessons: (state) => state.lessons,  // Add getter for lessons
     isLoading: (state) => state.loading,
     error: (state) => state.error,
-    watchedLessons: (state) => state.watchedLessons,  // Getter for watched lessons
 };
 
 const actions = {
@@ -74,9 +72,7 @@ const actions = {
             commit('setLoading', false);
         }
     },
-   markLessonAsWatched({ commit }, lessonId) {
-        commit('addWatchedLesson', lessonId);
-    },
+
 
 };
 
@@ -99,11 +95,7 @@ const mutations = {
     setError(state, error) {
         state.error = error;
     },
-    addWatchedLesson(state, lessonId) {
-        if (!state.watchedLessons.includes(lessonId)) {
-            state.watchedLessons.push(lessonId);
-        }
-    }
+ 
 };
 
 export default {

@@ -22,7 +22,7 @@
           <td>{{ course.title }}</td>
           <td>{{ course.description }}</td>
           <td>{{ parseFloat(course.price).toFixed(2) }}</td>
-<td>{{ formatDuration(course.duration) }}</td> 
+          <td>{{ formatDuration(course.duration) }}</td> 
           <td>{{ course.slug }}</td>
           <td>
             <img 
@@ -38,9 +38,15 @@
               @change="toggleFeatured(course)" 
             />
           </td>
-          <td>
-            <button class="btn secondary" @click="editCourse(course)">Edit</button>
-            <button class="btn danger" @click="openDeleteModal(course.id)">Delete</button>
+          <td class="action-buttons">
+            <!-- Buttons for Lesson, Edit, and Delete -->
+            <div class="lesson-btn">
+              <button class="btn primary" @click="manageLessons(course)">Lessons</button>
+            </div>
+            <div class="edit-delete-btns">
+              <button class="btn secondary" @click="editCourse(course)">Edit</button>
+              <button class="btn danger" @click="openDeleteModal(course.id)">Delete</button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -58,6 +64,7 @@
     </div>
   </div>
 </template>
+
 
 
 <script>
@@ -89,6 +96,9 @@ export default {
     },
     editCourse(course) {
       this.$router.push({ name: 'EditCourse', params: { id: course.id } });
+    },
+    manageLessons(course) {
+      this.$router.push({ name: 'ManageLessons', params: { courseId: course.id } }); // Navigate to the lessons management page
     },
     openDeleteModal(courseId) {
       this.courseToDelete = courseId;
@@ -131,6 +141,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .courses {
@@ -209,6 +220,28 @@ h1 {
   opacity: 0.9;
 }
 
+/* Action Buttons Styling */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px; /* Space between the buttons */
+}
+
+.lesson-btn {
+  margin-bottom: 10px; /* Space below the "Lessons" button */
+}
+
+.edit-delete-btns {
+  display: flex;
+  gap: 10px; /* Space between Edit and Delete buttons */
+}
+
+.course-image {
+  width: 100px !important;
+  height: 100px !important;
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
@@ -241,8 +274,4 @@ h1 {
   margin: 0 10px;
 }
 
-.course-image {
-  width: 100px !important;
-  height: 100px !important;
-}
 </style>
