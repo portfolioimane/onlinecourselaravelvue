@@ -4,9 +4,11 @@ const state = {
   stripeEnabled: false,
   stripePublicKey: '',
   stripeSecretKey: '',
+  stripeMode: '', // New property for stripe mode
   paypalEnabled: false,
   paypalClientId: '',
   paypalSecretKey: '',
+  paypalMode: '', // New property for paypal mode
 };
 
 const mutations = {
@@ -16,10 +18,12 @@ const mutations = {
       state.stripeEnabled = settings.enabled;
       state.stripePublicKey = settings.public_key;
       state.stripeSecretKey = settings.secret_key;
+      state.stripeMode = settings.mode || ''; // Set stripe mode if available
     } else if (settings.provider === 'paypal') {
       state.paypalEnabled = settings.enabled;
       state.paypalClientId = settings.public_key;
       state.paypalSecretKey = settings.secret_key;
+      state.paypalMode = settings.mode || ''; // Set paypal mode if available
     }
   },
   UPDATE_PAYMENT_SETTINGS(state, settings) {
@@ -27,10 +31,12 @@ const mutations = {
       state.stripeEnabled = settings.enabled;
       state.stripePublicKey = settings.public_key;
       state.stripeSecretKey = settings.secret_key;
+      state.stripeMode = settings.mode || state.stripeMode; // Update stripe mode if available
     } else if (settings.provider === 'paypal') {
       state.paypalEnabled = settings.enabled;
       state.paypalClientId = settings.public_key;
       state.paypalSecretKey = settings.secret_key;
+      state.paypalMode = settings.mode || state.paypalMode; // Update paypal mode if available
     }
   },
 };
@@ -58,14 +64,15 @@ const actions = {
   },
 };
 
-
 const getters = {
   isStripeEnabled: (state) => state.stripeEnabled,
   stripePublicKey: (state) => state.stripePublicKey,
   stripeSecretKey: (state) => state.stripeSecretKey,
+  stripeMode: (state) => state.stripeMode, // Getter for stripe mode
   isPaypalEnabled: (state) => state.paypalEnabled,
   paypalClientId: (state) => state.paypalClientId,
   paypalSecretKey: (state) => state.paypalSecretKey,
+  paypalMode: (state) => state.paypalMode, // Getter for paypal mode
 };
 
 export default {

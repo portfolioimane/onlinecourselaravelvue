@@ -31,6 +31,9 @@ use App\Http\Controllers\Api\Customer\CutomizeController;
 
 use App\Http\Controllers\Api\Customer\ContactController;
 
+use App\Http\Controllers\Api\Customer\EnrollmentController;
+
+
 use App\Http\Controllers\Frontend\CourseController;
 
 Route::get('courses', [CourseController::class, 'index']);
@@ -66,6 +69,17 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 
+// Order Routes
+Route::middleware('auth:sanctum')->prefix('enrollments')->group(function () {
+    Route::get('/', [EnrollmentController::class, 'index']);
+    Route::post('/create', [EnrollmentController::class, 'create']);
+    Route::get('/{id}', [EnrollmentController::class, 'show']);
+    Route::post('/create-stripe-payment', [EnrollmentController::class, 'createStripePayment']);
+    Route::post('/confirm-paypal-payment', [EnrollmentController::class, 'confirmPaypalPayment']);
+
+
+
+});
 
 
 

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('public_key')->nullable();
             $table->string('secret_key')->nullable();
             $table->boolean('enabled')->default(false); // Add 'enabled' column, default is true
+            $table->enum('mode', ['sandbox', 'live'])->default('sandbox');  // 'sandbox' or 'live' mode
             $table->timestamps();
         });
     }

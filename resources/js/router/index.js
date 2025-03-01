@@ -3,6 +3,7 @@ import store from '../store/index.js';
 import CoursesList from '../components/Frontend/Courses/CoursesList.vue';
 import CoursePage from '../components/Frontend/Courses/CoursePage.vue';
 import LessonPage from '../components/Frontend/Courses/LessonPage.vue';
+import Checkout from '../components/Frontend/Checkout.vue';
 
 // Import the layout
 import AppLayout from '../components/Frontend/Layout/AppLayout.vue';
@@ -64,6 +65,12 @@ const routes = [
         name: 'lesson', 
       component: LessonPage
        },
+        {
+        path: '/checkout/:courseId',
+        name: 'checkout',
+        component: Checkout,
+        meta: { requiresAuth: true },
+      },
       {
         name: 'Login',
         path: '/login',

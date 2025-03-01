@@ -28,6 +28,7 @@ const actions = {
     try {
       const response = await axios.get('/stripe/public-key');
       commit('SET_STRIPE_PUBLIC_KEY', response.data.publicKey);
+      console.log('fetchedstripekey',response.data.publicKey);
       commit('SET_STRIPE_ENABLED', response.data.isStripeEnabled); // Commit the enabled status
     } catch (error) {
       console.error('Error fetching Stripe public key:', error);

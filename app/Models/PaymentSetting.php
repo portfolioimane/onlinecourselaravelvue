@@ -8,5 +8,5 @@ class PaymentSetting extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['provider', 'public_key', 'secret_key', 'enabled'];
+    protected $fillable = ['provider', 'public_key', 'secret_key', 'enabled','mode'];
 }

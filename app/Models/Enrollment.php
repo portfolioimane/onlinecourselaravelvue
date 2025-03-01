@@ -13,8 +13,16 @@ class Enrollment extends Model
     protected $fillable = [
         'user_id',
         'course_id',
+        'name',
+        'email',
+        'phone',
+        'address',
+        'payment_method',
+        'total',
+        'status',
     ];
 
+    // Define relationships
     public function user()
     {
         return $this->belongsTo(User::class);

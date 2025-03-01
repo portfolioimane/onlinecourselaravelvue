@@ -14,6 +14,7 @@ class PaymentSettingController extends Controller
             'public_key' => 'nullable|string',
             'secret_key' => 'nullable|string',
             'enabled' => 'required|boolean',
+            'mode' => 'required|string|in:sandbox,live', // Add this line for mode validation
         ]);
 
         $setting = PaymentSetting::where('provider', $validated['provider'])->first();
@@ -24,12 +25,14 @@ class PaymentSettingController extends Controller
                 'enabled' => $validated['enabled'],
                 'public_key' => $validated['public_key'] ?? null,
                 'secret_key' => $validated['secret_key'] ?? null,
+                'mode' => $validated['mode'], // Store mode value
             ]);
         } else {
             $setting->update([
                 'enabled' => $validated['enabled'],
-                'public_key' => $validated['public_key']?? $setting->public_key,
-                'secret_key' => $validated['secret_key']?? $setting->secret_key,
+                'public_key' => $validated['public_key'] ?? $setting->public_key,
+                'secret_key' => $validated['secret_key'] ?? $setting->secret_key,
+                'mode' => $validated['mode'], // Update mode value
             ]);
         }
 

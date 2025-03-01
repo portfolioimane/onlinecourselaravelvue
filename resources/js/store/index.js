@@ -11,6 +11,7 @@ import contact from './modules/contact.js';
 import backendContact from './modules/backend/contact.js';
 import backendCourses from './modules/backend/courses.js';
 import backendLessons from './modules/backend/lessons.js';
+import enrollment from './modules/enrollment.js';
 
 
 const store = createStore({ // Use createStore for Vue 3
@@ -27,6 +28,7 @@ const store = createStore({ // Use createStore for Vue 3
     backendContact,
     backendCourses,
     backendLessons,
+    enrollment,
 
 
   },

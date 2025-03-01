@@ -53,28 +53,26 @@ import { mapGetters, mapActions } from 'vuex';
 export default {
   name: 'CoursePage',
   computed: {
-    // Use mapGetters to get the course and loading state
     ...mapGetters({
-      course: 'courses/selectedCourse',  // 'courses/selectedCourse' is the getter
-      isLoading: 'courses/isLoading',    // Optional: You can also map loading state to show a loading indicator
+      course: 'courses/selectedCourse',
+      isLoading: 'courses/isLoading',
     }),
   },
   created() {
-    this.fetchCourseById(this.$route.params.courseId);  // Fetch course by ID when component is created
+    this.fetchCourseById(this.$route.params.courseId);
   },
   methods: {
     ...mapActions({
-      fetchCourseById: 'courses/fetchCourseById',  // Map the action to fetch course by ID
+      fetchCourseById: 'courses/fetchCourseById',
     }),
 
-    // Method to format the duration into a user-friendly string
     formatDuration(duration) {
       if (!duration) return 'Duration not specified';
-      
+
       const hours = Math.floor(duration / 60);
       const minutes = duration % 60;
       let formattedDuration = '';
-      
+
       if (hours > 0) {
         formattedDuration += `${hours} hour${hours > 1 ? 's' : ''}`;
       }
@@ -86,9 +84,11 @@ export default {
       return formattedDuration || 'Duration not specified';
     },
 
-    // Enroll Now action
+    // Redirect to checkout page with courseId
     enrollNow() {
-      alert("You have enrolled in this course!");
+      if (this.course && this.course.id) {
+        this.$router.push({ name: 'checkout', params: { courseId: this.course.id } });
+      }
     },
   },
 };

@@ -23,6 +23,14 @@
 
         <!-- Show Stripe Fields only if Stripe is enabled -->
         <div v-if="localStripeEnabled">
+               <!-- Add Mode Selection for Stripe -->
+          <div class="form-group">
+            <label for="stripeMode" class="form-label">Stripe Mode</label>
+            <select v-model="localStripeMode" id="stripeMode" class="form-control">
+              <option value="sandbox">Sandbox</option>
+              <option value="live">Live</option>
+            </select>
+          </div>
           <div class="form-group">
             <label for="stripePublicKey" class="form-label">Stripe Public Key</label>
             <input
@@ -45,6 +53,7 @@
               required
             />
           </div>
+   
         </div>
 
         <div class="form-action">
@@ -71,6 +80,14 @@
         <!-- Show PayPal Fields only if PayPal is enabled -->
         <div v-if="localPaypalEnabled">
           <div class="form-group">
+                    <!-- Add Mode Selection for PayPal -->
+          <div class="form-group">
+            <label for="paypalMode" class="form-label">PayPal Mode</label>
+            <select v-model="localPaypalMode" id="paypalMode" class="form-control">
+              <option value="sandbox">Sandbox</option>
+              <option value="live">Live</option>
+            </select>
+          </div>
             <label for="paypalClientId" class="form-label">PayPal Client ID</label>
             <input
               v-model="localPaypalClientId"
@@ -92,6 +109,7 @@
               required
             />
           </div>
+
         </div>
 
         <div class="form-action">
@@ -128,9 +146,11 @@ export default {
       localStripeEnabled: false,
       localStripePublicKey: '',
       localStripeSecretKey: '',
+      localStripeMode: 'sandbox',  // Default to sandbox
       localPaypalEnabled: false,
       localPaypalClientId: '',
       localPaypalSecretKey: '',
+      localPaypalMode: 'sandbox',  // Default to sandbox
     };
   },
   computed: {
@@ -138,9 +158,11 @@ export default {
       'isStripeEnabled',
       'stripePublicKey',
       'stripeSecretKey',
+      'stripeMode',
       'isPaypalEnabled',
       'paypalClientId',
       'paypalSecretKey',
+      'paypalMode',
     ]),
   },
   methods: {
@@ -156,6 +178,7 @@ export default {
           enabled: this.localStripeEnabled,
           public_key: this.localStripePublicKey,
           secret_key: this.localStripeSecretKey,
+          mode: this.localStripeMode,  // Send mode along with other data
         });
         this.showMessage('Stripe settings updated successfully!', 'success');
       } catch (error) {
@@ -170,6 +193,7 @@ export default {
           enabled: this.localPaypalEnabled,
           public_key: this.localPaypalClientId,
           secret_key: this.localPaypalSecretKey,
+          mode: this.localPaypalMode,  // Send mode along with other data
         });
         this.showMessage('PayPal settings updated successfully!', 'success');
       } catch (error) {
@@ -196,9 +220,11 @@ export default {
         this.localStripeEnabled = this.isStripeEnabled;
         this.localStripePublicKey = this.stripePublicKey || '';
         this.localStripeSecretKey = this.stripeSecretKey || '';
+        this.localStripeMode = this.stripeMode || 'sandbox';  // Set the fetched mode
         this.localPaypalEnabled = this.isPaypalEnabled;
         this.localPaypalClientId = this.paypalClientId || '';
         this.localPaypalSecretKey = this.paypalSecretKey || '';
+        this.localPaypalMode = this.paypalMode || 'sandbox';  // Set the fetched mode
       })
       .catch((error) => {
         console.error('Error fetching payment settings:', error);
@@ -207,7 +233,9 @@ export default {
 };
 </script>
 
+
 <style scoped>
+/* Styling for the payment settings container */
 .payment-settings-container {
   padding: 20px;
   background-color: #f9f9f9;
@@ -284,7 +312,42 @@ export default {
   text-align: center;
   font-size: 14px;
   color: #333;
-  background-color:orange;
+  background-color: orange;
+}
+
+/* Enhanced Styling for Select Dropdown */
+select.form-control {
+  padding: 12px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+select.form-control:focus {
+  border-color: #1E90FF;
+  background-color: #f0f8ff; /* Light blue background on focus */
+  outline: none;
+}
+
+select.form-control option {
+  padding: 10px;
+}
+
+/* Styling for the payment settings buttons */
+.btn-update {
+  background-color: #1E90FF;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-update:hover {
+  background-color: #187bcd;
 }
 
 /* Modal Styling */
@@ -325,19 +388,20 @@ export default {
   display: flex;
   justify-content: flex-end;
 }
+
 .btn-closing {
   padding: 10px 20px;
   font-size: 16px;
   text-align: center;
   background: none;
   border: none;
-  width:auto;
-  background-color:#1F2A44 !important;
-  color:#fff;
+  width: auto;
+  background-color: #1F2A44 !important;
+  color: #fff;
 }
-
 
 .btn-closing:hover {
   background-color: #0056b3;
 }
+
 </style>

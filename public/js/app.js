@@ -3161,6 +3161,209 @@ function withinMaxClamp(min, value, max) {
 
 /***/ }),
 
+/***/ "./node_modules/@stripe/stripe-js/dist/index.mjs":
+/*!*******************************************************!*\
+  !*** ./node_modules/@stripe/stripe-js/dist/index.mjs ***!
+  \*******************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   loadStripe: () => (/* binding */ loadStripe)
+/* harmony export */ });
+var V3_URL = 'https://js.stripe.com/v3';
+var V3_URL_REGEX = /^https:\/\/js\.stripe\.com\/v3\/?(\?.*)?$/;
+var EXISTING_SCRIPT_MESSAGE = 'loadStripe.setLoadParameters was called but an existing Stripe.js script already exists in the document; existing script parameters will be used';
+var findScript = function findScript() {
+  var scripts = document.querySelectorAll("script[src^=\"".concat(V3_URL, "\"]"));
+
+  for (var i = 0; i < scripts.length; i++) {
+    var script = scripts[i];
+
+    if (!V3_URL_REGEX.test(script.src)) {
+      continue;
+    }
+
+    return script;
+  }
+
+  return null;
+};
+
+var injectScript = function injectScript(params) {
+  var queryString = params && !params.advancedFraudSignals ? '?advancedFraudSignals=false' : '';
+  var script = document.createElement('script');
+  script.src = "".concat(V3_URL).concat(queryString);
+  var headOrBody = document.head || document.body;
+
+  if (!headOrBody) {
+    throw new Error('Expected document.body not to be null. Stripe.js requires a <body> element.');
+  }
+
+  headOrBody.appendChild(script);
+  return script;
+};
+
+var registerWrapper = function registerWrapper(stripe, startTime) {
+  if (!stripe || !stripe._registerWrapper) {
+    return;
+  }
+
+  stripe._registerWrapper({
+    name: 'stripe-js',
+    version: "4.6.0",
+    startTime: startTime
+  });
+};
+
+var stripePromise = null;
+var onErrorListener = null;
+var onLoadListener = null;
+
+var onError = function onError(reject) {
+  return function () {
+    reject(new Error('Failed to load Stripe.js'));
+  };
+};
+
+var onLoad = function onLoad(resolve, reject) {
+  return function () {
+    if (window.Stripe) {
+      resolve(window.Stripe);
+    } else {
+      reject(new Error('Stripe.js not available'));
+    }
+  };
+};
+
+var loadScript = function loadScript(params) {
+  // Ensure that we only attempt to load Stripe.js at most once
+  if (stripePromise !== null) {
+    return stripePromise;
+  }
+
+  stripePromise = new Promise(function (resolve, reject) {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      // Resolve to null when imported server side. This makes the module
+      // safe to import in an isomorphic code base.
+      resolve(null);
+      return;
+    }
+
+    if (window.Stripe && params) {
+      console.warn(EXISTING_SCRIPT_MESSAGE);
+    }
+
+    if (window.Stripe) {
+      resolve(window.Stripe);
+      return;
+    }
+
+    try {
+      var script = findScript();
+
+      if (script && params) {
+        console.warn(EXISTING_SCRIPT_MESSAGE);
+      } else if (!script) {
+        script = injectScript(params);
+      } else if (script && onLoadListener !== null && onErrorListener !== null) {
+        var _script$parentNode;
+
+        // remove event listeners
+        script.removeEventListener('load', onLoadListener);
+        script.removeEventListener('error', onErrorListener); // if script exists, but we are reloading due to an error,
+        // reload script to trigger 'load' event
+
+        (_script$parentNode = script.parentNode) === null || _script$parentNode === void 0 ? void 0 : _script$parentNode.removeChild(script);
+        script = injectScript(params);
+      }
+
+      onLoadListener = onLoad(resolve, reject);
+      onErrorListener = onError(reject);
+      script.addEventListener('load', onLoadListener);
+      script.addEventListener('error', onErrorListener);
+    } catch (error) {
+      reject(error);
+      return;
+    }
+  }); // Resets stripePromise on error
+
+  return stripePromise["catch"](function (error) {
+    stripePromise = null;
+    return Promise.reject(error);
+  });
+};
+var initStripe = function initStripe(maybeStripe, args, startTime) {
+  if (maybeStripe === null) {
+    return null;
+  }
+
+  var stripe = maybeStripe.apply(undefined, args);
+  registerWrapper(stripe, startTime);
+  return stripe;
+}; // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+
+var stripePromise$1;
+var loadCalled = false;
+
+var getStripePromise = function getStripePromise() {
+  if (stripePromise$1) {
+    return stripePromise$1;
+  }
+
+  stripePromise$1 = loadScript(null)["catch"](function (error) {
+    // clear cache on error
+    stripePromise$1 = null;
+    return Promise.reject(error);
+  });
+  return stripePromise$1;
+}; // Execute our own script injection after a tick to give users time to do their
+// own script injection.
+
+
+Promise.resolve().then(function () {
+  return getStripePromise();
+})["catch"](function (error) {
+  if (!loadCalled) {
+    console.warn(error);
+  }
+});
+var loadStripe = function loadStripe() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  loadCalled = true;
+  var startTime = Date.now(); // if previous attempts are unsuccessful, will re-load script
+
+  return getStripePromise().then(function (maybeStripe) {
+    return initStripe(maybeStripe, args, startTime);
+  });
+};
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/@stripe/stripe-js/lib/index.mjs":
+/*!******************************************************!*\
+  !*** ./node_modules/@stripe/stripe-js/lib/index.mjs ***!
+  \******************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   loadStripe: () => (/* reexport safe */ _dist_index_mjs__WEBPACK_IMPORTED_MODULE_0__.loadStripe)
+/* harmony export */ });
+/* harmony import */ var _dist_index_mjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../dist/index.mjs */ "./node_modules/@stripe/stripe-js/dist/index.mjs");
+
+
+
+/***/ }),
+
 /***/ "./node_modules/@vue/compiler-core/dist/compiler-core.esm-bundler.js":
 /*!***************************************************************************!*\
   !*** ./node_modules/@vue/compiler-core/dist/compiler-core.esm-bundler.js ***!
@@ -29299,12 +29502,15 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       localStripeEnabled: false,
       localStripePublicKey: '',
       localStripeSecretKey: '',
+      localStripeMode: 'sandbox',
+      // Default to sandbox
       localPaypalEnabled: false,
       localPaypalClientId: '',
-      localPaypalSecretKey: ''
+      localPaypalSecretKey: '',
+      localPaypalMode: 'sandbox' // Default to sandbox
     };
   },
-  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapGetters)('paymentSetting', ['isStripeEnabled', 'stripePublicKey', 'stripeSecretKey', 'isPaypalEnabled', 'paypalClientId', 'paypalSecretKey'])),
+  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapGetters)('paymentSetting', ['isStripeEnabled', 'stripePublicKey', 'stripeSecretKey', 'stripeMode', 'isPaypalEnabled', 'paypalClientId', 'paypalSecretKey', 'paypalMode'])),
   methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)('paymentSetting', ['updatePaymentSettings', 'fetchPaymentSettings'])), {}, {
     updateStripeSettings: function updateStripeSettings() {
       var _this = this;
@@ -29318,7 +29524,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                 provider: 'stripe',
                 enabled: _this.localStripeEnabled,
                 public_key: _this.localStripePublicKey,
-                secret_key: _this.localStripeSecretKey
+                secret_key: _this.localStripeSecretKey,
+                mode: _this.localStripeMode // Send mode along with other data
               });
             case 3:
               _this.showMessage('Stripe settings updated successfully!', 'success');
@@ -29347,7 +29554,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
                 provider: 'paypal',
                 enabled: _this2.localPaypalEnabled,
                 public_key: _this2.localPaypalClientId,
-                secret_key: _this2.localPaypalSecretKey
+                secret_key: _this2.localPaypalSecretKey,
+                mode: _this2.localPaypalMode // Send mode along with other data
               });
             case 3:
               _this2.showMessage('PayPal settings updated successfully!', 'success');
@@ -29386,9 +29594,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       _this4.localStripeEnabled = _this4.isStripeEnabled;
       _this4.localStripePublicKey = _this4.stripePublicKey || '';
       _this4.localStripeSecretKey = _this4.stripeSecretKey || '';
+      _this4.localStripeMode = _this4.stripeMode || 'sandbox'; // Set the fetched mode
       _this4.localPaypalEnabled = _this4.isPaypalEnabled;
       _this4.localPaypalClientId = _this4.paypalClientId || '';
       _this4.localPaypalSecretKey = _this4.paypalSecretKey || '';
+      _this4.localPaypalMode = _this4.paypalMode || 'sandbox'; // Set the fetched mode
     })["catch"](function (error) {
       console.error('Error fetching payment settings:', error);
     });
@@ -29562,6 +29772,380 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/Frontend/Checkout.vue?vue&type=script&lang=js":
+/*!***********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/Frontend/Checkout.vue?vue&type=script&lang=js ***!
+  \***********************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm-bundler.js");
+/* harmony import */ var _stripe_stripe_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @stripe/stripe-js */ "./node_modules/@stripe/stripe-js/lib/index.mjs");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  data: function data() {
+    return {
+      form: {
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        payment_method: 'cash_on_delivery'
+      },
+      errorMessage: null,
+      successMessage: null,
+      loading: false
+    };
+  },
+  computed: _objectSpread(_objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapGetters)("keys", ["getStripePublicKey", "getPaypalPublicKey"])), (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapGetters)("courses", ["selectedCourse"])), {}, {
+    isFormValid: function isFormValid() {
+      return this.form.name && this.form.email && this.form.payment_method;
+    },
+    isStripeEnabled: function isStripeEnabled() {
+      return this.$store.getters["keys/isStripeEnabled"];
+    },
+    isPaypalEnabled: function isPaypalEnabled() {
+      return this.$store.getters["keys/isPaypalEnabled"];
+    },
+    user: function user() {
+      return this.$store.getters['auth/user']; // Get logged-in user data
+    }
+  }),
+  methods: _objectSpread(_objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapActions)("keys", ["fetchStripePublicKey", "fetchPaypalPublicKey"])), (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapActions)("courses", ["fetchCourseById"])), {}, {
+    getEnrollmentData: function getEnrollmentData() {
+      return {
+        name: this.form.name || this.user.name,
+        email: this.form.email || this.user.email,
+        phone: this.form.phone || this.user.phone,
+        address: this.form.address || this.user.address,
+        payment_method: this.form.payment_method,
+        total: this.selectedCourse.price,
+        course_id: this.$route.params.courseId
+      };
+    },
+    submitEnrollment: function submitEnrollment() {
+      var _this = this;
+      return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        var enrollmentData, _yield$_this$$store$d, clientSecret, _yield$_this$stripe$c, error, paymentIntent;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              if (_this.isFormValid) {
+                _context.next = 3;
+                break;
+              }
+              _this.errorMessage = "Please complete all fields and ensure your cart is not empty.";
+              return _context.abrupt("return");
+            case 3:
+              // Set loading state to true
+              _this.loading = true;
+              enrollmentData = _this.getEnrollmentData(); // Use the new method
+              _context.prev = 5;
+              if (!(_this.form.payment_method === 'stripe')) {
+                _context.next = 28;
+                break;
+              }
+              _context.next = 9;
+              return _this.$store.dispatch('enrollment/createStripePayment', _this.selectedCourse.price);
+            case 9:
+              _yield$_this$$store$d = _context.sent;
+              clientSecret = _yield$_this$$store$d.clientSecret;
+              if (clientSecret) {
+                _context.next = 13;
+                break;
+              }
+              throw new Error("Payment initialization failed.");
+            case 13:
+              _context.next = 15;
+              return _this.stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                  card: _this.cardElement,
+                  billing_details: {
+                    name: _this.form.name,
+                    email: _this.form.email
+                  }
+                }
+              });
+            case 15:
+              _yield$_this$stripe$c = _context.sent;
+              error = _yield$_this$stripe$c.error;
+              paymentIntent = _yield$_this$stripe$c.paymentIntent;
+              if (!error) {
+                _context.next = 20;
+                break;
+              }
+              throw error;
+            case 20:
+              if (!(paymentIntent.status === 'succeeded')) {
+                _context.next = 25;
+                break;
+              }
+              _context.next = 23;
+              return _this.submitEnrollmentAfterPayment(enrollmentData);
+            case 23:
+              _context.next = 26;
+              break;
+            case 25:
+              throw new Error("Payment not successful.");
+            case 26:
+              _context.next = 30;
+              break;
+            case 28:
+              _context.next = 30;
+              return _this.submitEnrollmentAfterPayment(enrollmentData);
+            case 30:
+              _context.next = 35;
+              break;
+            case 32:
+              _context.prev = 32;
+              _context.t0 = _context["catch"](5);
+              _this.errorMessage = _context.t0.message || "Failed to place order.";
+            case 35:
+              _context.prev = 35;
+              _this.loading = false;
+              return _context.finish(35);
+            case 38:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee, null, [[5, 32, 35, 38]]);
+      }))();
+    },
+    submitEnrollmentAfterPayment: function submitEnrollmentAfterPayment(enrollmentData) {
+      var _this2 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+        var response, courseId;
+        return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+          while (1) switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.prev = 0;
+              _context2.next = 3;
+              return _this2.$store.dispatch('enrollment/submitEnrollment', enrollmentData);
+            case 3:
+              response = _context2.sent;
+              courseId = _this2.$route.params.courseId;
+              _this2.form = {
+                name: '',
+                email: '',
+                phone: '',
+                address: '',
+                payment_method: 'cash_on_delivery'
+              };
+              _this2.$router.push("/course/".concat(courseId, "/lesson/1"));
+              _context2.next = 13;
+              break;
+            case 9:
+              _context2.prev = 9;
+              _context2.t0 = _context2["catch"](0);
+              console.error('Error submitting order:', _context2.t0);
+              alert('Failed to place the order. Please try again.');
+            case 13:
+            case "end":
+              return _context2.stop();
+          }
+        }, _callee2, null, [[0, 9]]);
+      }))();
+    },
+    fillUserData: function fillUserData() {
+      if (this.user) {
+        this.form.name = this.user.name || '';
+        this.form.email = this.user.email || '';
+        this.form.phone = this.user.phone || '';
+        this.form.address = this.user.address || '';
+      }
+    },
+    initializeStripe: function initializeStripe() {
+      var _this3 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+        var stripePublicKey, stripePromise;
+        return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+          while (1) switch (_context3.prev = _context3.next) {
+            case 0:
+              // If a Stripe element already exists, destroy it before reinitializing
+              if (_this3.cardElement) {
+                _this3.cardElement.unmount();
+                _this3.cardElement = null;
+              }
+              _context3.next = 3;
+              return _this3.fetchStripePublicKey();
+            case 3:
+              stripePublicKey = _this3.getStripePublicKey;
+              console.log('stripekey', stripePublicKey);
+              if (stripePublicKey) {
+                _context3.next = 8;
+                break;
+              }
+              console.error("Stripe public key is not available");
+              return _context3.abrupt("return");
+            case 8:
+              stripePromise = (0,_stripe_stripe_js__WEBPACK_IMPORTED_MODULE_0__.loadStripe)(stripePublicKey);
+              _context3.next = 11;
+              return stripePromise;
+            case 11:
+              _this3.stripe = _context3.sent;
+              _this3.elements = _this3.stripe.elements();
+              _this3.cardElement = _this3.elements.create('card');
+              _this3.cardElement.mount('#cardElement');
+            case 15:
+            case "end":
+              return _context3.stop();
+          }
+        }, _callee3);
+      }))();
+    },
+    loadPayPalScript: function loadPayPalScript() {
+      var _this4 = this;
+      if (!this.paypalLoaded) {
+        // Fetch PayPal public key from Vuex store asynchronously
+        this.fetchPaypalPublicKey().then(function () {
+          var clientId = _this4.getPaypalPublicKey;
+          if (!clientId) {
+            console.error('PayPal public key is not available');
+            return;
+          }
+          var script = document.createElement('script');
+          script.src = "https://www.paypal.com/sdk/js?client-id=".concat(clientId, "&currency=USD");
+          script.async = true;
+          script.onload = function () {
+            _this4.paypalLoaded = true;
+            _this4.renderPayPalButton();
+          };
+          document.body.appendChild(script);
+        })["catch"](function (error) {
+          console.error('Error fetching PayPal public key:', error);
+        });
+      } else {
+        this.renderPayPalButton();
+      }
+    },
+    renderPayPalButton: function renderPayPalButton() {
+      var _this5 = this;
+      // If validation passes, render the PayPal button
+      var interval = setInterval(function () {
+        var container = document.getElementById('paypal-button-container');
+        if (container) {
+          clearInterval(interval);
+          container.innerHTML = ''; // Clear previous button rendering
+
+          window.paypal.Buttons({
+            createOrder: function createOrder(data, actions) {
+              return actions.order.create({
+                purchase_units: [{
+                  amount: {
+                    value: _this5.selectedCourse.price
+                  }
+                }]
+              });
+            },
+            onApprove: function onApprove(data, actions) {
+              return actions.order.capture().then(/*#__PURE__*/function () {
+                var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(details) {
+                  var paypalOrderId, response, enrollmentData;
+                  return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+                    while (1) switch (_context4.prev = _context4.next) {
+                      case 0:
+                        paypalOrderId = data.orderID;
+                        _context4.prev = 1;
+                        _context4.next = 4;
+                        return _this5.$store.dispatch('enrollment/confirmPayPalPayment', paypalOrderId);
+                      case 4:
+                        response = _context4.sent;
+                        if (!(response.status === 'COMPLETED')) {
+                          _context4.next = 11;
+                          break;
+                        }
+                        enrollmentData = _this5.getEnrollmentData();
+                        _context4.next = 9;
+                        return _this5.submitEnrollmentAfterPayment(enrollmentData);
+                      case 9:
+                        _context4.next = 12;
+                        break;
+                      case 11:
+                        _this5.errorMessage = 'Payment not completed.';
+                      case 12:
+                        _context4.next = 17;
+                        break;
+                      case 14:
+                        _context4.prev = 14;
+                        _context4.t0 = _context4["catch"](1);
+                        _this5.errorMessage = 'Failed to confirm PayPal payment.';
+                      case 17:
+                      case "end":
+                        return _context4.stop();
+                    }
+                  }, _callee4, null, [[1, 14]]);
+                }));
+                return function (_x) {
+                  return _ref.apply(this, arguments);
+                };
+              }());
+            },
+            onError: function onError(err) {
+              _this5.errorMessage = 'An error occurred with PayPal.';
+            }
+          }).render('#paypal-button-container');
+        }
+      }, 100);
+    }
+  }),
+  watch: {
+    'form.payment_method': function formPayment_method(newValue) {
+      if (newValue === 'stripe') {
+        this.initializeStripe();
+      } else if (newValue === 'paypal') {
+        this.loadPayPalScript();
+      }
+    },
+    isFormValid: function isFormValid(newValue) {
+      // Watch for changes in form validity and show/hide PayPal button
+      if (newValue && this.form.payment_method === 'paypal') {
+        this.loadPayPalScript();
+      }
+    },
+    $route: function $route(to, from) {
+      var courseId = to.params.courseId;
+      if (courseId) {
+        this.fetchCourseById(courseId); // Fetch course based on the new courseId
+      }
+    }
+  },
+  mounted: function mounted() {
+    var _this6 = this;
+    var courseId = this.$route.params.courseId;
+    if (courseId) {
+      this.fetchCourseById(courseId); // Fetch course on component mount
+    }
+    if (this.form.payment_method === 'stripe') {
+      this.initializeStripe();
+    }
+    if (this.form.payment_method === 'paypal') {
+      this.loadPayPalScript();
+    }
+    this.fetchStripePublicKey();
+    this.fetchPaypalPublicKey();
+    this.$store.dispatch('auth/checkAuth').then(function () {
+      _this6.fillUserData();
+    });
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/Frontend/Contact.vue?vue&type=script&lang=js":
 /*!**********************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/Frontend/Contact.vue?vue&type=script&lang=js ***!
@@ -29658,16 +30242,14 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   name: 'CoursePage',
   computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapGetters)({
     course: 'courses/selectedCourse',
-    // 'courses/selectedCourse' is the getter
-    isLoading: 'courses/isLoading' // Optional: You can also map loading state to show a loading indicator
+    isLoading: 'courses/isLoading'
   })),
   created: function created() {
-    this.fetchCourseById(this.$route.params.courseId); // Fetch course by ID when component is created
+    this.fetchCourseById(this.$route.params.courseId);
   },
   methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)({
-    fetchCourseById: 'courses/fetchCourseById' // Map the action to fetch course by ID
+    fetchCourseById: 'courses/fetchCourseById'
   })), {}, {
-    // Method to format the duration into a user-friendly string
     formatDuration: function formatDuration(duration) {
       if (!duration) return 'Duration not specified';
       var hours = Math.floor(duration / 60);
@@ -29682,9 +30264,16 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       }
       return formattedDuration || 'Duration not specified';
     },
-    // Enroll Now action
+    // Redirect to checkout page with courseId
     enrollNow: function enrollNow() {
-      alert("You have enrolled in this course!");
+      if (this.course && this.course.id) {
+        this.$router.push({
+          name: 'checkout',
+          params: {
+            courseId: this.course.id
+          }
+        });
+      }
     }
   })
 });
@@ -31614,39 +32203,45 @@ var _hoisted_7 = {
   "class": "form-group"
 };
 var _hoisted_8 = {
-  "class": "settings-section"
+  "class": "form-group"
 };
 var _hoisted_9 = {
+  "class": "settings-section"
+};
+var _hoisted_10 = {
   "class": "form-group"
 };
-var _hoisted_10 = ["checked"];
-var _hoisted_11 = {
-  key: 0
-};
+var _hoisted_11 = ["checked"];
 var _hoisted_12 = {
-  "class": "form-group"
+  key: 0
 };
 var _hoisted_13 = {
   "class": "form-group"
 };
 var _hoisted_14 = {
-  "class": "modal-body"
+  "class": "form-group"
 };
 var _hoisted_15 = {
+  "class": "form-group"
+};
+var _hoisted_16 = {
+  "class": "modal-body"
+};
+var _hoisted_17 = {
   "class": "modal-footer"
 };
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [_cache[21] || (_cache[21] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [_cache[27] || (_cache[27] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
     "class": "settings-title"
-  }, "Payment Settings", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Reminder Note "), _cache[22] || (_cache[22] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, "Payment Settings", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Reminder Note "), _cache[28] || (_cache[28] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "reminder-note"
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", null, "Note:"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Don't forget to save your changes by clicking the \"Save\" button after making updates!")])], -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Stripe Settings Section "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_cache[15] || (_cache[15] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", {
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("strong", null, "Note:"), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Don't forget to save your changes by clicking the \"Save\" button after making updates!")])], -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Stripe Settings Section "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [_cache[19] || (_cache[19] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", {
     "class": "section-title"
   }, "Stripe Settings", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
-    onSubmit: _cache[3] || (_cache[3] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onSubmit: _cache[4] || (_cache[4] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.updateStripeSettings && $options.updateStripeSettings.apply($options, arguments);
     }, ["prevent"]))
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [_cache[11] || (_cache[11] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [_cache[13] || (_cache[13] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": "stripeEnabled",
     "class": "form-label"
   }, "Enable Stripe", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
@@ -31657,11 +32252,24 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     id: "stripeEnabled",
     "class": "checkbox-input",
     checked: $data.localStripeEnabled
-  }, null, 8 /* PROPS */, _hoisted_4), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localStripeEnabled]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Show Stripe Fields only if Stripe is enabled "), $data.localStripeEnabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_cache[12] || (_cache[12] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  }, null, 8 /* PROPS */, _hoisted_4), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localStripeEnabled]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Show Stripe Fields only if Stripe is enabled "), $data.localStripeEnabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Add Mode Selection for Stripe "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_cache[15] || (_cache[15] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "for": "stripeMode",
+    "class": "form-label"
+  }, "Stripe Mode", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
+      return $data.localStripeMode = $event;
+    }),
+    id: "stripeMode",
+    "class": "form-control"
+  }, _cache[14] || (_cache[14] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+    value: "sandbox"
+  }, "Sandbox", -1 /* HOISTED */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+    value: "live"
+  }, "Live", -1 /* HOISTED */)]), 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $data.localStripeMode]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [_cache[16] || (_cache[16] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": "stripePublicKey",
     "class": "form-label"
   }, "Stripe Public Key", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
+    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
       return $data.localStripePublicKey = $event;
     }),
     type: "text",
@@ -31669,11 +32277,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "form-control",
     placeholder: "Enter Stripe Public Key",
     required: ""
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.localStripePublicKey]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [_cache[13] || (_cache[13] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.localStripePublicKey]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [_cache[17] || (_cache[17] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": "stripeSecretKey",
     "class": "form-label"
   }, "Stripe Secret Key", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
+    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
       return $data.localStripeSecretKey = $event;
     }),
     type: "text",
@@ -31681,33 +32289,46 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "form-control",
     placeholder: "Enter Stripe Secret Key",
     required: ""
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.localStripeSecretKey]])])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _cache[14] || (_cache[14] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.localStripeSecretKey]])])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _cache[18] || (_cache[18] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "form-action"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     type: "submit",
     "class": "btn btn-update"
-  }, "Save Stripe Settings")], -1 /* HOISTED */))], 32 /* NEED_HYDRATION */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" PayPal Settings Section "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [_cache[20] || (_cache[20] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", {
+  }, "Save Stripe Settings")], -1 /* HOISTED */))], 32 /* NEED_HYDRATION */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" PayPal Settings Section "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [_cache[26] || (_cache[26] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", {
     "class": "section-title"
   }, "PayPal Settings", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
-    onSubmit: _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+    onSubmit: _cache[9] || (_cache[9] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
       return $options.updatePaypalSettings && $options.updatePaypalSettings.apply($options, arguments);
     }, ["prevent"]))
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [_cache[16] || (_cache[16] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [_cache[20] || (_cache[20] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": "paypalEnabled",
     "class": "form-label"
   }, "Enable PayPal", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
       return $data.localPaypalEnabled = $event;
     }),
     type: "checkbox",
     id: "paypalEnabled",
     "class": "checkbox-input",
     checked: $data.localPaypalEnabled
-  }, null, 8 /* PROPS */, _hoisted_10), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localPaypalEnabled]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Show PayPal Fields only if PayPal is enabled "), $data.localPaypalEnabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [_cache[17] || (_cache[17] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  }, null, 8 /* PROPS */, _hoisted_11), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelCheckbox, $data.localPaypalEnabled]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Show PayPal Fields only if PayPal is enabled "), $data.localPaypalEnabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Add Mode Selection for PayPal "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [_cache[22] || (_cache[22] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "for": "paypalMode",
+    "class": "form-label"
+  }, "PayPal Mode", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("select", {
+    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
+      return $data.localPaypalMode = $event;
+    }),
+    id: "paypalMode",
+    "class": "form-control"
+  }, _cache[21] || (_cache[21] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+    value: "sandbox"
+  }, "Sandbox", -1 /* HOISTED */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("option", {
+    value: "live"
+  }, "Live", -1 /* HOISTED */)]), 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelSelect, $data.localPaypalMode]])]), _cache[23] || (_cache[23] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": "paypalClientId",
     "class": "form-label"
   }, "PayPal Client ID", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
+    "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
       return $data.localPaypalClientId = $event;
     }),
     type: "text",
@@ -31715,11 +32336,11 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "form-control",
     placeholder: "Enter PayPal Client ID",
     required: ""
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.localPaypalClientId]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [_cache[18] || (_cache[18] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.localPaypalClientId]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [_cache[24] || (_cache[24] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
     "for": "paypalSecretKey",
     "class": "form-label"
   }, "PayPal Secret Key", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
-    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
+    "onUpdate:modelValue": _cache[8] || (_cache[8] = function ($event) {
       return $data.localPaypalSecretKey = $event;
     }),
     type: "text",
@@ -31727,7 +32348,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "form-control",
     placeholder: "Enter PayPal Secret Key",
     required: ""
-  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.localPaypalSecretKey]])])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _cache[19] || (_cache[19] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.localPaypalSecretKey]])])])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _cache[25] || (_cache[25] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "form-action"
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
     type: "submit",
@@ -31735,16 +32356,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   }, "Save PayPal Settings")], -1 /* HOISTED */))], 32 /* NEED_HYDRATION */)])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Success/Error Modal "), $data.message ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", {
     key: 0,
     "class": "modal-overlay",
-    onClick: _cache[10] || (_cache[10] = function () {
+    onClick: _cache[12] || (_cache[12] = function () {
       return $options.closeModal && $options.closeModal.apply($options, arguments);
     })
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": "modal-content",
-    onClick: _cache[9] || (_cache[9] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {}, ["stop"]))
+    onClick: _cache[11] || (_cache[11] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {}, ["stop"]))
   }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(['modal-header', $data.message.type])
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.message.type === 'success' ? 'Success' : 'Error'), 1 /* TEXT */)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.message.text), 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
-    onClick: _cache[8] || (_cache[8] = function () {
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h3", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.message.type === 'success' ? 'Success' : 'Error'), 1 /* TEXT */)], 2 /* CLASS */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("p", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.message.text), 1 /* TEXT */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
+    onClick: _cache[10] || (_cache[10] = function () {
       return $options.closeModal && $options.closeModal.apply($options, arguments);
     }),
     "class": "btn btn-closing"
@@ -31924,6 +32545,203 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     type: "submit",
     "class": "btn btn-golden mt-3"
   }, "Register", -1 /* HOISTED */))], 32 /* NEED_HYDRATION */), $data.error ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_6, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.error), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]);
+}
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/Frontend/Checkout.vue?vue&type=template&id=3f8fec68":
+/*!***************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/Frontend/Checkout.vue?vue&type=template&id=3f8fec68 ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* binding */ render)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+
+var _hoisted_1 = {
+  "class": "container mt-5 checkout-container"
+};
+var _hoisted_2 = {
+  "class": "row"
+};
+var _hoisted_3 = {
+  "class": "col-md-6"
+};
+var _hoisted_4 = {
+  key: 0,
+  "class": "alert alert-danger"
+};
+var _hoisted_5 = {
+  key: 1,
+  "class": "alert alert-success"
+};
+var _hoisted_6 = {
+  "class": "mb-3"
+};
+var _hoisted_7 = {
+  "class": "mb-3"
+};
+var _hoisted_8 = {
+  "class": "mb-3"
+};
+var _hoisted_9 = {
+  "class": "mb-3"
+};
+var _hoisted_10 = {
+  "class": "form-check"
+};
+var _hoisted_11 = {
+  key: 2,
+  "class": "form-check"
+};
+var _hoisted_12 = {
+  key: 3,
+  "class": "mb-3"
+};
+var _hoisted_13 = {
+  key: 4,
+  "class": "form-check"
+};
+var _hoisted_14 = {
+  "class": "paypal-button-container"
+};
+var _hoisted_15 = {
+  key: 0,
+  id: "paypal-button-container"
+};
+var _hoisted_16 = {
+  key: 1,
+  "class": "alert alert-warning"
+};
+var _hoisted_17 = ["disabled"];
+var _hoisted_18 = {
+  key: 0,
+  "class": "spinner-border spinner-border-sm",
+  role: "status",
+  "aria-hidden": "true"
+};
+var _hoisted_19 = {
+  "class": "col-md-6"
+};
+var _hoisted_20 = {
+  "class": "list-group"
+};
+var _hoisted_21 = {
+  key: 0,
+  "class": "list-group-item"
+};
+var _hoisted_22 = {
+  "class": "float-end"
+};
+var _hoisted_23 = {
+  "class": "text-end mt-4"
+};
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_cache[21] || (_cache[21] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h2", {
+    "class": "text-center mb-4"
+  }, "Checkout", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [_cache[18] || (_cache[18] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h4", {
+    "class": "mb-4"
+  }, "Customer Information", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("form", {
+    onSubmit: _cache[7] || (_cache[7] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.withModifiers)(function () {
+      return $options.submitEnrollment && $options.submitEnrollment.apply($options, arguments);
+    }, ["prevent"]))
+  }, [$data.errorMessage ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_4, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.errorMessage), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.successMessage ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($data.successMessage), 1 /* TEXT */)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Customer information form fields "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [_cache[8] || (_cache[8] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "for": "name",
+    "class": "form-label"
+  }, "Name", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    id: "name",
+    "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
+      return $data.form.name = $event;
+    }),
+    "class": "form-control",
+    required: ""
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.form.name]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [_cache[9] || (_cache[9] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "for": "email",
+    "class": "form-label"
+  }, "Email", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "email",
+    id: "email",
+    "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
+      return $data.form.email = $event;
+    }),
+    "class": "form-control",
+    required: ""
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.form.email]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [_cache[10] || (_cache[10] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "for": "phone",
+    "class": "form-label"
+  }, "Phone", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    id: "phone",
+    "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
+      return $data.form.phone = $event;
+    }),
+    "class": "form-control",
+    required: ""
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.form.phone]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [_cache[11] || (_cache[11] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "for": "address",
+    "class": "form-label"
+  }, "Address", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "text",
+    id: "address",
+    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
+      return $data.form.address = $event;
+    }),
+    "class": "form-control",
+    required: ""
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $data.form.address]])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Payment method selection "), _cache[17] || (_cache[17] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h4", {
+    "class": "mb-4"
+  }, "Select Payment Method", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "radio",
+    id: "cod",
+    "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
+      return $data.form.payment_method = $event;
+    }),
+    value: "cash_on_delivery",
+    "class": "form-check-input",
+    required: ""
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelRadio, $data.form.payment_method]]), _cache[12] || (_cache[12] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "class": "form-check-label",
+    "for": "cod"
+  }, "Cash on Delivery", -1 /* HOISTED */))]), $options.isStripeEnabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "radio",
+    id: "stripe",
+    "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
+      return $data.form.payment_method = $event;
+    }),
+    value: "stripe",
+    "class": "form-check-input"
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelRadio, $data.form.payment_method]]), _cache[13] || (_cache[13] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "class": "form-check-label",
+    "for": "stripe"
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("i", {
+    "class": "fas fa-credit-card"
+  }), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Credit Card ")], -1 /* HOISTED */))])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $data.form.payment_method === 'stripe' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_12, _cache[14] || (_cache[14] = [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
+    id: "cardElement",
+    "class": "form-control"
+  }, null, -1 /* HOISTED */)]))) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), $options.isPaypalEnabled ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+    type: "radio",
+    id: "paypal",
+    "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
+      return $data.form.payment_method = $event;
+    }),
+    value: "paypal",
+    "class": "form-check-input"
+  }, null, 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelRadio, $data.form.payment_method]]), _cache[15] || (_cache[15] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+    "class": "form-check-label",
+    "for": "paypal"
+  }, "PayPal", -1 /* HOISTED */))])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" PayPal Button "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [$options.isFormValid ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_15)) : ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_16, "Please complete all fields before proceeding with PayPal."))], 512 /* NEED_PATCH */), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $data.form.payment_method === 'paypal']]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" Submit button with loading state, but only show it if PayPal is NOT selected "), $data.form.payment_method !== 'paypal' ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("button", {
+    key: 5,
+    type: "submit",
+    "class": "btn btn-golden mt-3 w-100",
+    disabled: !$options.isFormValid || $data.loading
+  }, [$data.loading ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("span", _hoisted_18)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true), _cache[16] || (_cache[16] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)(" Place Order "))], 8 /* PROPS */, _hoisted_17)) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)], 32 /* NEED_HYDRATION */)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [_cache[20] || (_cache[20] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h4", {
+    "class": "mb-4 text-center"
+  }, "Course Summary", -1 /* HOISTED */)), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_20, [_ctx.selectedCourse ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("li", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.selectedCourse.title), 1 /* TEXT */), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_22, "$" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.selectedCourse.price), 1 /* TEXT */)])) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("h5", _hoisted_23, [_cache[19] || (_cache[19] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.createTextVNode)("Total: ")), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", null, "$" + (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(_ctx.selectedCourse ? _ctx.selectedCourse.price : 0), 1 /* TEXT */)])])])]);
 }
 
 /***/ }),
@@ -39828,7 +40646,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.payment-settings-container[data-v-8d762e8a] {\n  padding: 20px;\n  background-color: #f9f9f9;\n  border-radius: 8px;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n  max-width: 800px;\n  margin: 0 auto;\n}\n.settings-title[data-v-8d762e8a] {\n  text-align: center;\n  color: #333;\n  font-size: 24px;\n  margin-bottom: 20px;\n}\n.settings-section[data-v-8d762e8a] {\n  margin-bottom: 30px;\n}\n.section-title[data-v-8d762e8a] {\n  font-size: 20px;\n  color: #333;\n  border-bottom: 2px solid #ddd;\n  padding-bottom: 8px;\n  margin-bottom: 15px;\n}\n.form-group[data-v-8d762e8a] {\n  margin-bottom: 1.5rem;\n}\n.form-label[data-v-8d762e8a] {\n  font-size: 16px;\n  color: #333;\n}\n.form-control[data-v-8d762e8a] {\n  width: 100%;\n  padding: 12px;\n  border-radius: 5px;\n  border: 1px solid #ccc;\n  font-size: 14px;\n  transition: border-color 0.3s ease;\n}\n.form-control[data-v-8d762e8a]:focus {\n  border-color: #1E90FF;\n}\n.checkbox-input[data-v-8d762e8a] {\n  width: auto;\n  height: 20px;\n  margin-right: 10px;\n}\n.btn-update[data-v-8d762e8a] {\n  background-color: #1E90FF;\n  color: white;\n  border: none;\n  padding: 12px 20px;\n  border-radius: 5px;\n  cursor: pointer;\n  font-size: 16px;\n}\n.btn-update[data-v-8d762e8a]:hover {\n  background-color: #187bcd;\n}\n.reminder-note[data-v-8d762e8a] {\n  margin-top: 20px;\n  border-radius: 5px;\n  text-align: center;\n  font-size: 14px;\n  color: #333;\n  background-color:orange;\n}\n\n/* Modal Styling */\n.modal-overlay[data-v-8d762e8a] {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background-color: rgba(0, 0, 0, 0.5);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n.modal-content[data-v-8d762e8a] {\n  background-color: #fff;\n  padding: 20px;\n  border-radius: 8px;\n  max-width: 400px;\n  width: 100%;\n}\n.modal-header[data-v-8d762e8a] {\n  font-size: 18px;\n  font-weight: bold;\n}\n.modal-header.success[data-v-8d762e8a] {\n  color: #28a745;\n}\n.modal-header.error[data-v-8d762e8a] {\n  color: #dc3545;\n}\n.modal-footer[data-v-8d762e8a] {\n  display: flex;\n  justify-content: flex-end;\n}\n.btn-closing[data-v-8d762e8a] {\n  padding: 10px 20px;\n  font-size: 16px;\n  text-align: center;\n  background: none;\n  border: none;\n  width:auto;\n  background-color:#1F2A44 !important;\n  color:#fff;\n}\n.btn-closing[data-v-8d762e8a]:hover {\n  background-color: #0056b3;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n/* Styling for the payment settings container */\n.payment-settings-container[data-v-8d762e8a] {\n  padding: 20px;\n  background-color: #f9f9f9;\n  border-radius: 8px;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n  max-width: 800px;\n  margin: 0 auto;\n}\n.settings-title[data-v-8d762e8a] {\n  text-align: center;\n  color: #333;\n  font-size: 24px;\n  margin-bottom: 20px;\n}\n.settings-section[data-v-8d762e8a] {\n  margin-bottom: 30px;\n}\n.section-title[data-v-8d762e8a] {\n  font-size: 20px;\n  color: #333;\n  border-bottom: 2px solid #ddd;\n  padding-bottom: 8px;\n  margin-bottom: 15px;\n}\n.form-group[data-v-8d762e8a] {\n  margin-bottom: 1.5rem;\n}\n.form-label[data-v-8d762e8a] {\n  font-size: 16px;\n  color: #333;\n}\n.form-control[data-v-8d762e8a] {\n  width: 100%;\n  padding: 12px;\n  border-radius: 5px;\n  border: 1px solid #ccc;\n  font-size: 14px;\n  transition: border-color 0.3s ease;\n}\n.form-control[data-v-8d762e8a]:focus {\n  border-color: #1E90FF;\n}\n.checkbox-input[data-v-8d762e8a] {\n  width: auto;\n  height: 20px;\n  margin-right: 10px;\n}\n.btn-update[data-v-8d762e8a] {\n  background-color: #1E90FF;\n  color: white;\n  border: none;\n  padding: 12px 20px;\n  border-radius: 5px;\n  cursor: pointer;\n  font-size: 16px;\n}\n.btn-update[data-v-8d762e8a]:hover {\n  background-color: #187bcd;\n}\n.reminder-note[data-v-8d762e8a] {\n  margin-top: 20px;\n  border-radius: 5px;\n  text-align: center;\n  font-size: 14px;\n  color: #333;\n  background-color: orange;\n}\n\n/* Enhanced Styling for Select Dropdown */\nselect.form-control[data-v-8d762e8a] {\n  padding: 12px;\n  background-color: #fff;\n  border: 1px solid #ccc;\n  border-radius: 5px;\n  font-size: 14px;\n  transition: border-color 0.3s ease, background-color 0.3s ease;\n}\nselect.form-control[data-v-8d762e8a]:focus {\n  border-color: #1E90FF;\n  background-color: #f0f8ff; /* Light blue background on focus */\n  outline: none;\n}\nselect.form-control option[data-v-8d762e8a] {\n  padding: 10px;\n}\n\n/* Styling for the payment settings buttons */\n.btn-update[data-v-8d762e8a] {\n  background-color: #1E90FF;\n  color: white;\n  border: none;\n  padding: 12px 20px;\n  border-radius: 5px;\n  cursor: pointer;\n  font-size: 16px;\n}\n.btn-update[data-v-8d762e8a]:hover {\n  background-color: #187bcd;\n}\n\n/* Modal Styling */\n.modal-overlay[data-v-8d762e8a] {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background-color: rgba(0, 0, 0, 0.5);\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n.modal-content[data-v-8d762e8a] {\n  background-color: #fff;\n  padding: 20px;\n  border-radius: 8px;\n  max-width: 400px;\n  width: 100%;\n}\n.modal-header[data-v-8d762e8a] {\n  font-size: 18px;\n  font-weight: bold;\n}\n.modal-header.success[data-v-8d762e8a] {\n  color: #28a745;\n}\n.modal-header.error[data-v-8d762e8a] {\n  color: #dc3545;\n}\n.modal-footer[data-v-8d762e8a] {\n  display: flex;\n  justify-content: flex-end;\n}\n.btn-closing[data-v-8d762e8a] {\n  padding: 10px 20px;\n  font-size: 16px;\n  text-align: center;\n  background: none;\n  border: none;\n  width: auto;\n  background-color: #1F2A44 !important;\n  color: #fff;\n}\n.btn-closing[data-v-8d762e8a]:hover {\n  background-color: #0056b3;\n}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -48690,6 +49508,66 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/Frontend/Checkout.vue":
+/*!*******************************************************!*\
+  !*** ./resources/js/components/Frontend/Checkout.vue ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _Checkout_vue_vue_type_template_id_3f8fec68__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Checkout.vue?vue&type=template&id=3f8fec68 */ "./resources/js/components/Frontend/Checkout.vue?vue&type=template&id=3f8fec68");
+/* harmony import */ var _Checkout_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Checkout.vue?vue&type=script&lang=js */ "./resources/js/components/Frontend/Checkout.vue?vue&type=script&lang=js");
+/* harmony import */ var _node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+
+
+
+
+;
+const __exports__ = /*#__PURE__*/(0,_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_Checkout_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_Checkout_vue_vue_type_template_id_3f8fec68__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/components/Frontend/Checkout.vue"]])
+/* hot reload */
+if (false) {}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__exports__);
+
+/***/ }),
+
+/***/ "./resources/js/components/Frontend/Checkout.vue?vue&type=script&lang=js":
+/*!*******************************************************************************!*\
+  !*** ./resources/js/components/Frontend/Checkout.vue?vue&type=script&lang=js ***!
+  \*******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_Checkout_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_Checkout_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./Checkout.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/Frontend/Checkout.vue?vue&type=script&lang=js");
+ 
+
+/***/ }),
+
+/***/ "./resources/js/components/Frontend/Checkout.vue?vue&type=template&id=3f8fec68":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/Frontend/Checkout.vue?vue&type=template&id=3f8fec68 ***!
+  \*************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_Checkout_vue_vue_type_template_id_3f8fec68__WEBPACK_IMPORTED_MODULE_0__.render)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_dist_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_Checkout_vue_vue_type_template_id_3f8fec68__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!../../../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./Checkout.vue?vue&type=template&id=3f8fec68 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/components/Frontend/Checkout.vue?vue&type=template&id=3f8fec68");
+
+
+/***/ }),
+
 /***/ "./resources/js/components/Frontend/Contact.vue":
 /*!******************************************************!*\
   !*** ./resources/js/components/Frontend/Contact.vue ***!
@@ -49765,37 +50643,39 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.mjs");
+/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.mjs");
 /* harmony import */ var _store_index_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../store/index.js */ "./resources/js/store/index.js");
 /* harmony import */ var _components_Frontend_Courses_CoursesList_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/Frontend/Courses/CoursesList.vue */ "./resources/js/components/Frontend/Courses/CoursesList.vue");
 /* harmony import */ var _components_Frontend_Courses_CoursePage_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/Frontend/Courses/CoursePage.vue */ "./resources/js/components/Frontend/Courses/CoursePage.vue");
 /* harmony import */ var _components_Frontend_Courses_LessonPage_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/Frontend/Courses/LessonPage.vue */ "./resources/js/components/Frontend/Courses/LessonPage.vue");
-/* harmony import */ var _components_Frontend_Layout_AppLayout_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/Frontend/Layout/AppLayout.vue */ "./resources/js/components/Frontend/Layout/AppLayout.vue");
-/* harmony import */ var _components_Admin_Layout_AdminLayout_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../components/Admin/Layout/AdminLayout.vue */ "./resources/js/components/Admin/Layout/AdminLayout.vue");
-/* harmony import */ var _components_Auth_Login_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../components/Auth/Login.vue */ "./resources/js/components/Auth/Login.vue");
-/* harmony import */ var _components_Auth_Register_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../components/Auth/Register.vue */ "./resources/js/components/Auth/Register.vue");
-/* harmony import */ var _components_Frontend_ResetPassword_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../components/Frontend/ResetPassword.vue */ "./resources/js/components/Frontend/ResetPassword.vue");
-/* harmony import */ var _components_Frontend_ForgotPassword_vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../components/Frontend/ForgotPassword.vue */ "./resources/js/components/Frontend/ForgotPassword.vue");
-/* harmony import */ var _components_Frontend_Profile_vue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../components/Frontend/Profile.vue */ "./resources/js/components/Frontend/Profile.vue");
-/* harmony import */ var _components_Frontend_Contact_vue__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../components/Frontend/Contact.vue */ "./resources/js/components/Frontend/Contact.vue");
-/* harmony import */ var _components_Frontend_CustomerLayout_vue__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../components/Frontend/CustomerLayout.vue */ "./resources/js/components/Frontend/CustomerLayout.vue");
-/* harmony import */ var _components_Frontend_Home_vue__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../components/Frontend/Home.vue */ "./resources/js/components/Frontend/Home.vue");
-/* harmony import */ var _components_Admin_Dashboard_AdminDashboard_vue__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../components/Admin/Dashboard/AdminDashboard.vue */ "./resources/js/components/Admin/Dashboard/AdminDashboard.vue");
-/* harmony import */ var _components_Admin_Settings_PaymentSetting_vue__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../components/Admin/Settings/PaymentSetting.vue */ "./resources/js/components/Admin/Settings/PaymentSetting.vue");
-/* harmony import */ var _components_Admin_Customize_GeneralCustomize_vue__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../components/Admin/Customize/GeneralCustomize.vue */ "./resources/js/components/Admin/Customize/GeneralCustomize.vue");
-/* harmony import */ var _components_Admin_Customize_HomePageHeader_vue__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../components/Admin/Customize/HomePageHeader.vue */ "./resources/js/components/Admin/Customize/HomePageHeader.vue");
-/* harmony import */ var _components_Admin_Customers_Customers_vue__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../components/Admin/Customers/Customers.vue */ "./resources/js/components/Admin/Customers/Customers.vue");
-/* harmony import */ var _components_Admin_Customers_ContactMessages_vue__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../components/Admin/Customers/ContactMessages.vue */ "./resources/js/components/Admin/Customers/ContactMessages.vue");
-/* harmony import */ var _components_Admin_Courses_Courses_vue__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../components/Admin/Courses/Courses.vue */ "./resources/js/components/Admin/Courses/Courses.vue");
-/* harmony import */ var _components_Admin_Courses_AddCourse_vue__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../components/Admin/Courses/AddCourse.vue */ "./resources/js/components/Admin/Courses/AddCourse.vue");
-/* harmony import */ var _components_Admin_Courses_EditCourse_vue__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../components/Admin/Courses/EditCourse.vue */ "./resources/js/components/Admin/Courses/EditCourse.vue");
-/* harmony import */ var _components_Admin_Lessons_ManageLessons_vue__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ../components/Admin/Lessons/ManageLessons.vue */ "./resources/js/components/Admin/Lessons/ManageLessons.vue");
-/* harmony import */ var _components_Admin_Lessons_AddLesson_vue__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ../components/Admin/Lessons/AddLesson.vue */ "./resources/js/components/Admin/Lessons/AddLesson.vue");
-/* harmony import */ var _components_Admin_Lessons_EditLesson_vue__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ../components/Admin/Lessons/EditLesson.vue */ "./resources/js/components/Admin/Lessons/EditLesson.vue");
+/* harmony import */ var _components_Frontend_Checkout_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/Frontend/Checkout.vue */ "./resources/js/components/Frontend/Checkout.vue");
+/* harmony import */ var _components_Frontend_Layout_AppLayout_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../components/Frontend/Layout/AppLayout.vue */ "./resources/js/components/Frontend/Layout/AppLayout.vue");
+/* harmony import */ var _components_Admin_Layout_AdminLayout_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../components/Admin/Layout/AdminLayout.vue */ "./resources/js/components/Admin/Layout/AdminLayout.vue");
+/* harmony import */ var _components_Auth_Login_vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../components/Auth/Login.vue */ "./resources/js/components/Auth/Login.vue");
+/* harmony import */ var _components_Auth_Register_vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../components/Auth/Register.vue */ "./resources/js/components/Auth/Register.vue");
+/* harmony import */ var _components_Frontend_ResetPassword_vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../components/Frontend/ResetPassword.vue */ "./resources/js/components/Frontend/ResetPassword.vue");
+/* harmony import */ var _components_Frontend_ForgotPassword_vue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../components/Frontend/ForgotPassword.vue */ "./resources/js/components/Frontend/ForgotPassword.vue");
+/* harmony import */ var _components_Frontend_Profile_vue__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../components/Frontend/Profile.vue */ "./resources/js/components/Frontend/Profile.vue");
+/* harmony import */ var _components_Frontend_Contact_vue__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../components/Frontend/Contact.vue */ "./resources/js/components/Frontend/Contact.vue");
+/* harmony import */ var _components_Frontend_CustomerLayout_vue__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ../components/Frontend/CustomerLayout.vue */ "./resources/js/components/Frontend/CustomerLayout.vue");
+/* harmony import */ var _components_Frontend_Home_vue__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../components/Frontend/Home.vue */ "./resources/js/components/Frontend/Home.vue");
+/* harmony import */ var _components_Admin_Dashboard_AdminDashboard_vue__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../components/Admin/Dashboard/AdminDashboard.vue */ "./resources/js/components/Admin/Dashboard/AdminDashboard.vue");
+/* harmony import */ var _components_Admin_Settings_PaymentSetting_vue__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../components/Admin/Settings/PaymentSetting.vue */ "./resources/js/components/Admin/Settings/PaymentSetting.vue");
+/* harmony import */ var _components_Admin_Customize_GeneralCustomize_vue__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../components/Admin/Customize/GeneralCustomize.vue */ "./resources/js/components/Admin/Customize/GeneralCustomize.vue");
+/* harmony import */ var _components_Admin_Customize_HomePageHeader_vue__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ../components/Admin/Customize/HomePageHeader.vue */ "./resources/js/components/Admin/Customize/HomePageHeader.vue");
+/* harmony import */ var _components_Admin_Customers_Customers_vue__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ../components/Admin/Customers/Customers.vue */ "./resources/js/components/Admin/Customers/Customers.vue");
+/* harmony import */ var _components_Admin_Customers_ContactMessages_vue__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ../components/Admin/Customers/ContactMessages.vue */ "./resources/js/components/Admin/Customers/ContactMessages.vue");
+/* harmony import */ var _components_Admin_Courses_Courses_vue__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ../components/Admin/Courses/Courses.vue */ "./resources/js/components/Admin/Courses/Courses.vue");
+/* harmony import */ var _components_Admin_Courses_AddCourse_vue__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ../components/Admin/Courses/AddCourse.vue */ "./resources/js/components/Admin/Courses/AddCourse.vue");
+/* harmony import */ var _components_Admin_Courses_EditCourse_vue__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ../components/Admin/Courses/EditCourse.vue */ "./resources/js/components/Admin/Courses/EditCourse.vue");
+/* harmony import */ var _components_Admin_Lessons_ManageLessons_vue__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ../components/Admin/Lessons/ManageLessons.vue */ "./resources/js/components/Admin/Lessons/ManageLessons.vue");
+/* harmony import */ var _components_Admin_Lessons_AddLesson_vue__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(/*! ../components/Admin/Lessons/AddLesson.vue */ "./resources/js/components/Admin/Lessons/AddLesson.vue");
+/* harmony import */ var _components_Admin_Lessons_EditLesson_vue__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(/*! ../components/Admin/Lessons/EditLesson.vue */ "./resources/js/components/Admin/Lessons/EditLesson.vue");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+
 
 
 
@@ -49831,7 +50711,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 
 var routes = [{
   path: '/',
-  component: _components_Frontend_Layout_AppLayout_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
+  component: _components_Frontend_Layout_AppLayout_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
   children: [{
     path: 'coursesList',
     name: 'coursesList',
@@ -49845,101 +50725,108 @@ var routes = [{
     name: 'lesson',
     component: _components_Frontend_Courses_LessonPage_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   }, {
+    path: '/checkout/:courseId',
+    name: 'checkout',
+    component: _components_Frontend_Checkout_vue__WEBPACK_IMPORTED_MODULE_4__["default"],
+    meta: {
+      requiresAuth: true
+    }
+  }, {
     name: 'Login',
     path: '/login',
-    component: _components_Auth_Login_vue__WEBPACK_IMPORTED_MODULE_6__["default"]
+    component: _components_Auth_Login_vue__WEBPACK_IMPORTED_MODULE_7__["default"]
   }, {
     name: 'Register',
     path: '/register',
-    component: _components_Auth_Register_vue__WEBPACK_IMPORTED_MODULE_7__["default"]
+    component: _components_Auth_Register_vue__WEBPACK_IMPORTED_MODULE_8__["default"]
   }, {
     name: 'ResetPassword',
     path: '/password/reset/:token',
-    component: _components_Frontend_ResetPassword_vue__WEBPACK_IMPORTED_MODULE_8__["default"],
+    component: _components_Frontend_ResetPassword_vue__WEBPACK_IMPORTED_MODULE_9__["default"],
     props: true
   }, {
     name: 'ForgotPassword',
     path: '/forgotpassword',
-    component: _components_Frontend_ForgotPassword_vue__WEBPACK_IMPORTED_MODULE_9__["default"],
+    component: _components_Frontend_ForgotPassword_vue__WEBPACK_IMPORTED_MODULE_10__["default"],
     props: true
   }, {
     name: 'Home',
     path: '/',
-    component: _components_Frontend_Home_vue__WEBPACK_IMPORTED_MODULE_13__["default"]
+    component: _components_Frontend_Home_vue__WEBPACK_IMPORTED_MODULE_14__["default"]
   }, {
     name: 'Contact',
     path: '/contact',
-    component: _components_Frontend_Contact_vue__WEBPACK_IMPORTED_MODULE_11__["default"]
+    component: _components_Frontend_Contact_vue__WEBPACK_IMPORTED_MODULE_12__["default"]
   }, {
     path: '/customerdashboard',
-    component: _components_Frontend_CustomerLayout_vue__WEBPACK_IMPORTED_MODULE_12__["default"],
+    component: _components_Frontend_CustomerLayout_vue__WEBPACK_IMPORTED_MODULE_13__["default"],
     meta: {
       requiresAuth: true
     },
     children: [{
       name: 'Profile',
       path: 'profile',
-      component: _components_Frontend_Profile_vue__WEBPACK_IMPORTED_MODULE_10__["default"]
+      component: _components_Frontend_Profile_vue__WEBPACK_IMPORTED_MODULE_11__["default"]
     }]
   }]
 }, {
   path: '/admin',
-  component: _components_Admin_Layout_AdminLayout_vue__WEBPACK_IMPORTED_MODULE_5__["default"],
+  component: _components_Admin_Layout_AdminLayout_vue__WEBPACK_IMPORTED_MODULE_6__["default"],
   meta: {
     requiresAdmin: true
   },
   children: [{
     name: 'AdminDashboard',
     path: 'dashboard',
-    component: _components_Admin_Dashboard_AdminDashboard_vue__WEBPACK_IMPORTED_MODULE_14__["default"]
+    component: _components_Admin_Dashboard_AdminDashboard_vue__WEBPACK_IMPORTED_MODULE_15__["default"]
   }, {
     name: 'Courses',
     path: 'courses',
-    component: _components_Admin_Courses_Courses_vue__WEBPACK_IMPORTED_MODULE_20__["default"]
+    component: _components_Admin_Courses_Courses_vue__WEBPACK_IMPORTED_MODULE_21__["default"]
   }, {
     path: 'courses/:courseId/lessons',
     name: 'ManageLessons',
-    component: _components_Admin_Lessons_ManageLessons_vue__WEBPACK_IMPORTED_MODULE_23__["default"]
+    component: _components_Admin_Lessons_ManageLessons_vue__WEBPACK_IMPORTED_MODULE_24__["default"]
   }, {
     path: '/courses/:courseId/add-lesson',
     name: 'AddLesson',
-    component: _components_Admin_Lessons_AddLesson_vue__WEBPACK_IMPORTED_MODULE_24__["default"]
+    component: _components_Admin_Lessons_AddLesson_vue__WEBPACK_IMPORTED_MODULE_25__["default"]
   }, {
     name: 'AddCourses',
     path: 'courses/add',
-    component: _components_Admin_Courses_AddCourse_vue__WEBPACK_IMPORTED_MODULE_21__["default"]
+    component: _components_Admin_Courses_AddCourse_vue__WEBPACK_IMPORTED_MODULE_22__["default"]
   }, {
     path: 'courses/edit/:id',
     name: 'EditCourse',
-    component: _components_Admin_Courses_EditCourse_vue__WEBPACK_IMPORTED_MODULE_22__["default"]
+    component: _components_Admin_Courses_EditCourse_vue__WEBPACK_IMPORTED_MODULE_23__["default"]
   }, {
     path: 'courses/:courseId/lessons/edit/:lessonId',
     name: 'EditLesson',
-    component: _components_Admin_Lessons_EditLesson_vue__WEBPACK_IMPORTED_MODULE_25__["default"]
+    component: _components_Admin_Lessons_EditLesson_vue__WEBPACK_IMPORTED_MODULE_26__["default"]
   }, {
     name: 'Customers',
     path: 'customers',
-    component: _components_Admin_Customers_Customers_vue__WEBPACK_IMPORTED_MODULE_18__["default"]
+    component: _components_Admin_Customers_Customers_vue__WEBPACK_IMPORTED_MODULE_19__["default"]
   }, {
     path: 'contact-messages',
     name: 'ContactMessages',
-    component: _components_Admin_Customers_ContactMessages_vue__WEBPACK_IMPORTED_MODULE_19__["default"]
+    component: _components_Admin_Customers_ContactMessages_vue__WEBPACK_IMPORTED_MODULE_20__["default"]
   }, {
     name: 'PaymentSetting',
     path: 'paymentsetting',
-    component: _components_Admin_Settings_PaymentSetting_vue__WEBPACK_IMPORTED_MODULE_15__["default"]
+    component: _components_Admin_Settings_PaymentSetting_vue__WEBPACK_IMPORTED_MODULE_16__["default"]
   }, {
     name: 'GeneralCustomize',
     path: 'generalcustomize',
-    component: _components_Admin_Customize_GeneralCustomize_vue__WEBPACK_IMPORTED_MODULE_16__["default"]
+    component: _components_Admin_Customize_GeneralCustomize_vue__WEBPACK_IMPORTED_MODULE_17__["default"]
   }, {
     name: 'HomePageHeader',
     path: 'customize/homepageheader',
-    component: _components_Admin_Customize_HomePageHeader_vue__WEBPACK_IMPORTED_MODULE_17__["default"]
+    component: _components_Admin_Customize_HomePageHeader_vue__WEBPACK_IMPORTED_MODULE_18__["default"]
   }]
 }];
-var router = (0,vue_router__WEBPACK_IMPORTED_MODULE_26__.createRouter)({
-  history: (0,vue_router__WEBPACK_IMPORTED_MODULE_26__.createWebHistory)(),
+var router = (0,vue_router__WEBPACK_IMPORTED_MODULE_27__.createRouter)({
+  history: (0,vue_router__WEBPACK_IMPORTED_MODULE_27__.createWebHistory)(),
   routes: routes
 });
 router.beforeEach(/*#__PURE__*/function () {
@@ -50001,7 +50888,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm-bundler.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm-bundler.js");
 /* harmony import */ var _modules_courses_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/courses.js */ "./resources/js/store/modules/courses.js");
 /* harmony import */ var _modules_auth_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/auth.js */ "./resources/js/store/modules/auth.js");
 /* harmony import */ var _modules_keys_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/keys.js */ "./resources/js/store/modules/keys.js");
@@ -50014,6 +50901,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_backend_contact_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./modules/backend/contact.js */ "./resources/js/store/modules/backend/contact.js");
 /* harmony import */ var _modules_backend_courses_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./modules/backend/courses.js */ "./resources/js/store/modules/backend/courses.js");
 /* harmony import */ var _modules_backend_lessons_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./modules/backend/lessons.js */ "./resources/js/store/modules/backend/lessons.js");
+/* harmony import */ var _modules_enrollment_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./modules/enrollment.js */ "./resources/js/store/modules/enrollment.js");
  // Updated import
 
 
@@ -50027,7 +50915,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var store = (0,vuex__WEBPACK_IMPORTED_MODULE_12__.createStore)({
+
+var store = (0,vuex__WEBPACK_IMPORTED_MODULE_13__.createStore)({
   // Use createStore for Vue 3
   modules: {
     courses: _modules_courses_js__WEBPACK_IMPORTED_MODULE_0__["default"],
@@ -50041,7 +50930,8 @@ var store = (0,vuex__WEBPACK_IMPORTED_MODULE_12__.createStore)({
     contact: _modules_contact_js__WEBPACK_IMPORTED_MODULE_8__["default"],
     backendContact: _modules_backend_contact_js__WEBPACK_IMPORTED_MODULE_9__["default"],
     backendCourses: _modules_backend_courses_js__WEBPACK_IMPORTED_MODULE_10__["default"],
-    backendLessons: _modules_backend_lessons_js__WEBPACK_IMPORTED_MODULE_11__["default"]
+    backendLessons: _modules_backend_lessons_js__WEBPACK_IMPORTED_MODULE_11__["default"],
+    enrollment: _modules_enrollment_js__WEBPACK_IMPORTED_MODULE_12__["default"]
   }
 });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (store);
@@ -51099,9 +51989,12 @@ var state = {
   stripeEnabled: false,
   stripePublicKey: '',
   stripeSecretKey: '',
+  stripeMode: '',
+  // New property for stripe mode
   paypalEnabled: false,
   paypalClientId: '',
-  paypalSecretKey: ''
+  paypalSecretKey: '',
+  paypalMode: '' // New property for paypal mode
 };
 var mutations = {
   SET_PAYMENT_SETTINGS: function SET_PAYMENT_SETTINGS(state, settings) {
@@ -51110,10 +52003,12 @@ var mutations = {
       state.stripeEnabled = settings.enabled;
       state.stripePublicKey = settings.public_key;
       state.stripeSecretKey = settings.secret_key;
+      state.stripeMode = settings.mode || ''; // Set stripe mode if available
     } else if (settings.provider === 'paypal') {
       state.paypalEnabled = settings.enabled;
       state.paypalClientId = settings.public_key;
       state.paypalSecretKey = settings.secret_key;
+      state.paypalMode = settings.mode || ''; // Set paypal mode if available
     }
   },
   UPDATE_PAYMENT_SETTINGS: function UPDATE_PAYMENT_SETTINGS(state, settings) {
@@ -51121,10 +52016,12 @@ var mutations = {
       state.stripeEnabled = settings.enabled;
       state.stripePublicKey = settings.public_key;
       state.stripeSecretKey = settings.secret_key;
+      state.stripeMode = settings.mode || state.stripeMode; // Update stripe mode if available
     } else if (settings.provider === 'paypal') {
       state.paypalEnabled = settings.enabled;
       state.paypalClientId = settings.public_key;
       state.paypalSecretKey = settings.secret_key;
+      state.paypalMode = settings.mode || state.paypalMode; // Update paypal mode if available
     }
   }
 };
@@ -51196,6 +52093,10 @@ var getters = {
   stripeSecretKey: function stripeSecretKey(state) {
     return state.stripeSecretKey;
   },
+  stripeMode: function stripeMode(state) {
+    return state.stripeMode;
+  },
+  // Getter for stripe mode
   isPaypalEnabled: function isPaypalEnabled(state) {
     return state.paypalEnabled;
   },
@@ -51204,7 +52105,10 @@ var getters = {
   },
   paypalSecretKey: function paypalSecretKey(state) {
     return state.paypalSecretKey;
-  }
+  },
+  paypalMode: function paypalMode(state) {
+    return state.paypalMode;
+  } // Getter for paypal mode
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   namespaced: true,
@@ -51803,6 +52707,188 @@ var mutations = {
 
 /***/ }),
 
+/***/ "./resources/js/store/modules/enrollment.js":
+/*!**************************************************!*\
+  !*** ./resources/js/store/modules/enrollment.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _utils_axios_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/axios.js */ "./resources/js/utils/axios.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+
+var state = {
+  enrollments: [],
+  totalEnrollments: 0
+};
+var mutations = {
+  setEnrollments: function setEnrollments(state, _ref) {
+    var enrollments = _ref.enrollments,
+      total = _ref.total;
+    state.enrollments = enrollments;
+    state.totalEnrollments = total;
+  },
+  addEnrollment: function addEnrollment(state, enrollment) {
+    state.enrollments.push(enrollment);
+  }
+};
+var actions = {
+  fetchEnrollments: function fetchEnrollments(_ref2) {
+    return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+      var commit, response;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            commit = _ref2.commit;
+            _context.prev = 1;
+            _context.next = 4;
+            return _utils_axios_js__WEBPACK_IMPORTED_MODULE_0__["default"].get("/enrollments");
+          case 4:
+            response = _context.sent;
+            commit("setEnrollments", response.data);
+            _context.next = 11;
+            break;
+          case 8:
+            _context.prev = 8;
+            _context.t0 = _context["catch"](1);
+            console.error("Error fetching enrollments:", _context.t0);
+          case 11:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee, null, [[1, 8]]);
+    }))();
+  },
+  submitEnrollment: function submitEnrollment(_ref3, enrollmentData) {
+    return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+      var commit, response;
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            commit = _ref3.commit;
+            _context2.prev = 1;
+            _context2.next = 4;
+            return _utils_axios_js__WEBPACK_IMPORTED_MODULE_0__["default"].post("/enrollments/create", enrollmentData);
+          case 4:
+            response = _context2.sent;
+            commit("addEnrollment", response.data.enrollment);
+            return _context2.abrupt("return", response.data.enrollment);
+          case 9:
+            _context2.prev = 9;
+            _context2.t0 = _context2["catch"](1);
+            console.error("Error submitting enrollment:", _context2.t0);
+            throw _context2.t0;
+          case 13:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2, null, [[1, 9]]);
+    }))();
+  },
+  fetchEnrollmentById: function fetchEnrollmentById(_, enrollmentId) {
+    return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+      var response;
+      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+        while (1) switch (_context3.prev = _context3.next) {
+          case 0:
+            _context3.prev = 0;
+            _context3.next = 3;
+            return _utils_axios_js__WEBPACK_IMPORTED_MODULE_0__["default"].get("/enrollments/".concat(enrollmentId));
+          case 3:
+            response = _context3.sent;
+            return _context3.abrupt("return", response.data);
+          case 7:
+            _context3.prev = 7;
+            _context3.t0 = _context3["catch"](0);
+            console.error("Error fetching enrollment by ID:", _context3.t0);
+            throw _context3.t0;
+          case 11:
+          case "end":
+            return _context3.stop();
+        }
+      }, _callee3, null, [[0, 7]]);
+    }))();
+  },
+  // Create Stripe Payment Intent
+  createStripePayment: function createStripePayment(_, totalAmount) {
+    return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4() {
+      var response;
+      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+        while (1) switch (_context4.prev = _context4.next) {
+          case 0:
+            _context4.prev = 0;
+            _context4.next = 3;
+            return _utils_axios_js__WEBPACK_IMPORTED_MODULE_0__["default"].post("/enrollments/create-stripe-payment", {
+              total: totalAmount
+            });
+          case 3:
+            response = _context4.sent;
+            return _context4.abrupt("return", response.data);
+          case 7:
+            _context4.prev = 7;
+            _context4.t0 = _context4["catch"](0);
+            console.error("Error creating Stripe payment:", _context4.t0);
+            throw _context4.t0;
+          case 11:
+          case "end":
+            return _context4.stop();
+        }
+      }, _callee4, null, [[0, 7]]);
+    }))();
+  },
+  // Confirm PayPal Payment
+  confirmPayPalPayment: function confirmPayPalPayment(_, paypalOrderId) {
+    return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
+      var response;
+      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+        while (1) switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.prev = 0;
+            _context5.next = 3;
+            return _utils_axios_js__WEBPACK_IMPORTED_MODULE_0__["default"].post("/enrollments/confirm-paypal-payment", {
+              paypalOrderId: paypalOrderId
+            });
+          case 3:
+            response = _context5.sent;
+            return _context5.abrupt("return", response.data);
+          case 7:
+            _context5.prev = 7;
+            _context5.t0 = _context5["catch"](0);
+            console.error("Error confirming PayPal payment:", _context5.t0);
+            throw _context5.t0;
+          case 11:
+          case "end":
+            return _context5.stop();
+        }
+      }, _callee5, null, [[0, 7]]);
+    }))();
+  }
+};
+var getters = {
+  allEnrollments: function allEnrollments(state) {
+    return state.enrollments;
+  },
+  enrollmentCount: function enrollmentCount(state) {
+    return state.totalEnrollments;
+  }
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  namespaced: true,
+  state: state,
+  mutations: mutations,
+  actions: actions,
+  getters: getters
+});
+
+/***/ }),
+
 /***/ "./resources/js/store/modules/generalcustomize.js":
 /*!********************************************************!*\
   !*** ./resources/js/store/modules/generalcustomize.js ***!
@@ -51930,18 +53016,19 @@ var actions = {
           case 4:
             response = _context.sent;
             commit('SET_STRIPE_PUBLIC_KEY', response.data.publicKey);
+            console.log('fetchedstripekey', response.data.publicKey);
             commit('SET_STRIPE_ENABLED', response.data.isStripeEnabled); // Commit the enabled status
-            _context.next = 12;
+            _context.next = 13;
             break;
-          case 9:
-            _context.prev = 9;
+          case 10:
+            _context.prev = 10;
             _context.t0 = _context["catch"](1);
             console.error('Error fetching Stripe public key:', _context.t0);
-          case 12:
+          case 13:
           case "end":
             return _context.stop();
         }
-      }, _callee, null, [[1, 9]]);
+      }, _callee, null, [[1, 10]]);
     }))();
   },
   // Fetch PayPal public key and status
