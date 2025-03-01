@@ -76,21 +76,26 @@
             :disabled="!isFormValid || loading"
           >
             <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Place Order
+            Enroll Now
           </button>
         </form>
       </div>
 
-      <div class="col-md-6">
-        <h4 class="mb-4 text-center">Course Summary</h4>
-        <ul class="list-group">
-          <li v-if="selectedCourse" class="list-group-item">
-            <span>{{ selectedCourse.title }}</span>
-            <span class="float-end">${{ selectedCourse.price }}</span>
-          </li>
-        </ul>
-        <h5 class="text-end mt-4">Total: <span>${{ selectedCourse ? selectedCourse.price : 0 }}</span></h5>
-      </div>
+<div class="col-md-6">
+  <h4 class="mb-4 text-center">Course Summary</h4>
+
+  <ul class="list-group">
+    <li v-if="selectedCourse" class="list-group-item">
+        <div class="course-image-container text-center mb-4">
+    <img v-if="selectedCourse" :src="selectedCourse.image" alt="Course Image" class="img-fluid course-image" />
+  </div>
+      <span>{{ selectedCourse.title }}</span>
+      <span class="float-end">${{ selectedCourse.price }}</span>
+    </li>
+  </ul>
+  <h5 class="text-end mt-4">Total: <span>${{ selectedCourse ? selectedCourse.price : 0 }}</span></h5>
+</div>
+
     </div>
   </div>
 </template>
@@ -209,7 +214,6 @@ async submitEnrollment() {
 this.$router.push(`/course/${courseId}/lesson/1`);
     } catch (error) {
       console.error('Error submitting order:', error);
-      alert('Failed to place the order. Please try again.');
     }
   },
 
@@ -363,3 +367,160 @@ watch: {
   },
 };
 </script>
+<style scoped>
+.checkout-container {
+  background-color: #f8f9fa;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.course-image {
+  width: 100px;
+  height:100px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-container h2 {
+  font-size: 28px;
+  color: #333;
+  font-weight: 600;
+}
+
+.checkout-container h4 {
+  font-size: 20px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.checkout-container .form-label {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.checkout-container .form-control {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  padding: 10px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.checkout-container .form-control:focus {
+  border-color: #495057;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.checkout-container .alert {
+  margin-bottom: 20px;
+}
+
+.checkout-container .form-check {
+  margin-bottom: 15px;
+}
+
+.checkout-container .form-check-label {
+  font-size: 16px;
+  color: #495057;
+}
+
+.checkout-container .paypal-button-container {
+  margin-top: 20px;
+}
+
+.checkout-container .btn-golden {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.checkout-container .btn-golden:hover {
+  background-color: #e67e22;
+}
+
+.checkout-container .btn-golden:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.checkout-container .col-md-6 {
+  padding: 20px;
+}
+
+.checkout-container .col-md-6 h4 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+}
+
+.checkout-container .list-group-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  padding: 12px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 10px;
+}
+
+.checkout-container .list-group-item span {
+  font-weight: 600;
+}
+
+.checkout-container .course-summary {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.checkout-container .course-summary img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.checkout-container .course-summary .total-price {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+
+.checkout-container .course-summary .total-price span {
+  color: #f39c12;
+}
+
+@media (max-width: 768px) {
+  .checkout-container {
+    padding: 30px 15px;
+  }
+
+  .checkout-container .col-md-6 {
+    padding: 10px;
+  }
+
+  .checkout-container .course-summary {
+    padding: 15px;
+  }
+
+  .checkout-container h2 {
+    font-size: 24px;
+  }
+
+  .checkout-container h4 {
+    font-size: 18px;
+  }
+
+  .checkout-container .btn-golden {
+    font-size: 16px;
+    padding: 10px;
+  }
+}
+</style>
